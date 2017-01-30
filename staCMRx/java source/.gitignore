@@ -1,0 +1,13 @@
+/target/
+/bin/
+/delay.csv
+/build.fxbuild
+/delay3.csv
+/delay32.csv
+/delayE.csv
+/shrinkTest.csv
+/test1.csv
+/test1arg2.csv
+/test1arg3.csv
+/test1multiRange.csv
+/test1multiRangeFLAT.csv
