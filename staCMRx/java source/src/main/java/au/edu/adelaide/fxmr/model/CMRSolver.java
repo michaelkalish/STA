@@ -16,6 +16,25 @@ public class CMRSolver {
 
 	private CMRListener listener;
 
+	private double mrTolerance1;
+	private double mrTolerance2;
+
+	public double getMrTolerance1() {
+		return mrTolerance1;
+	}
+
+	public void setMrTolerance1(double mrTolerance1) {
+		this.mrTolerance1 = mrTolerance1;
+	}
+
+	public double getMrTolerance2() {
+		return mrTolerance2;
+	}
+
+	public void setMrTolerance2(double mrTolerance2) {
+		this.mrTolerance2 = mrTolerance2;
+	}
+
 	public CMRSolver() {
 	}
 
@@ -40,6 +59,8 @@ public class CMRSolver {
 		TreeSet<CMRTrial> remaining = new TreeSet<>();
 
 		MRSolver mrSolver = new MRSolverAJOptimiser();
+		if (mrTolerance1 != 0)
+			mrSolver.setTolerance(mrTolerance1, mrTolerance2);
 
 		// Add first CMRTrial
 		remaining.add(new CMRTrial(problem.getRangeSet(), nvar, weights, means));

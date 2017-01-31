@@ -5,9 +5,7 @@ package au.edu.adelaide.fxmr.model.mr;
  * 
  * 
  */
-public class MRSolverJOptimiserOriginal implements MRSolver {
-	private int calls;
-
+public class MRSolverJOptimiserOriginal extends MRSolver {
 	public MRSolution solve(MRProblem p) {
 		return null;
 /*
@@ -146,10 +144,5 @@ public class MRSolverJOptimiserOriginal implements MRSolver {
 		// previousSolnMap.put(p, s);
 		return s;
 */
-	}
-
-	@Override
-	public int getCalls() {
-		return calls;
 	}
 }

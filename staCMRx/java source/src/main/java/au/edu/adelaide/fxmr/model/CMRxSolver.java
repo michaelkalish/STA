@@ -24,6 +24,8 @@ public class CMRxSolver {
 	private boolean easyFail;
 	private boolean allowCyclic = true;
 	private double tolerance = 0;
+	private double mrTolerance1 = 0;
+	private double mrTolerance2 = 0;
 
 	public CMRxSolver() {
 	}
@@ -76,7 +78,10 @@ public class CMRxSolver {
 		TreeSet<CMRxTrial> remaining = new TreeSet<>();
 
 		MRSolverAJOptimiser mrSolver = new MRSolverAJOptimiser();
-		//mrSolver.setFailQuietly(easyFail);
+		if (mrTolerance1 != 0)
+			mrSolver.setTolerance(mrTolerance1, mrTolerance2);
+
+		// mrSolver.setFailQuietly(easyFail);
 		mrSolver.setAllowCyclicProblems(allowCyclic);
 
 		// Add first CMRxTrial
@@ -108,13 +113,13 @@ public class CMRxSolver {
 		while (!remaining.isEmpty() && fFloor < fBar * tolerancem1) {
 			CMRxTrial current = remaining.pollFirst();
 			fFloor = current.getF();
-			
-			double upperFloor = remaining.isEmpty() ? fFloor : remaining.last().getF();		
+
+			double upperFloor = remaining.isEmpty() ? fFloor : remaining.last().getF();
 			if (sl != null && iter.size() % 100 == 0) {
-				if (!sl.updateStatus(fFloor, fBar,upperFloor, remaining.size(), new int[] { iter.size() }, 0, fBarReductions, cyclicAvoided))
+				if (!sl.updateStatus(fFloor, fBar, upperFloor, remaining.size(), new int[] { iter.size() }, 0, fBarReductions,
+						cyclicAvoided))
 					break;
 			}
-
 
 			if (targetSet && (fBar < finalTarget || (fFloor >= finalTarget && fBar >= finalTarget))) {
 				// upper bound < target or lower bound > target
@@ -136,7 +141,7 @@ public class CMRxSolver {
 						// This was caused by a failed MR call (the warning
 						// would have been printed elsewhere)
 						// System.err.println("Warning: ..." );
-					}else{
+					} else {
 						cyclicAvoided++;
 					}
 				} else {
@@ -414,5 +419,21 @@ public class CMRxSolver {
 
 	public void setAllowCyclic(boolean allowCyclic) {
 		this.allowCyclic = allowCyclic;
+	}
+
+	public double getMrTolerance1() {
+		return mrTolerance1;
+	}
+
+	public void setMrTolerance1(double mrTolerance1) {
+		this.mrTolerance1 = mrTolerance1;
+	}
+
+	public double getMrTolerance2() {
+		return mrTolerance2;
+	}
+
+	public void setMrTolerance2(double mrTolerance2) {
+		this.mrTolerance2 = mrTolerance2;
 	}
 }

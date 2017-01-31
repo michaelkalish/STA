@@ -307,7 +307,7 @@ public class MRFitsTest {
 
 		Fits sol = new CMRxFits(200, problem.getProblem(), -1, 0, false, true);
 
-		// System.out.println(sol.getP());
+		//System.out.println(sol.getP());
 		// System.out.println(sol.getDataFit());
 		// System.out.println(Arrays.toString(sol.getFits()));
 

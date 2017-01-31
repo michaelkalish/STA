@@ -108,7 +108,7 @@ public class KaitlynTests {
 				});
 		assertEquals(expectedW1, problem.getWeights()[0]);
 		CMRSolution sol = solver.solve(problem);
-		assertEquals(3.22374073887459, sol.getFStar(), 1e-12);
+		assertEquals(3.22374073887459, sol.getFStar(), 1e-5);
 	}
 
 	@Test

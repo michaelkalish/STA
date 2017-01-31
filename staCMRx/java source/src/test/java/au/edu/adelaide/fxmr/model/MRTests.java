@@ -72,13 +72,12 @@ public class MRTests {
 				0.9583333333333334, 0.8541666666666666 };
 		int[][] rangeSet = { { 15, 17 }, { 1, 3 }, { 3, 17 }, { 17, 15 }, { 4, 0 }, { 3, 13 }, { 5, 13 }, { 13, 1 } };
 		MRProblem p = new MRProblem(y, rangeSet);
-		
+
 		HashSet<SimpleLinearConstraint> eq = new HashSet<>();
 		HashSet<SimpleLinearConstraint> ineq = new HashSet<>();
-		
+
 		double[] start = p.findFeasibleStart(1, ineq, eq);
 		assertTrue(p.testFeas(start));
-		
 	}
 
 	@Test
@@ -171,13 +170,15 @@ public class MRTests {
 		cons.add(new SimpleLinearConstraint(means.length, 1, 8));
 
 		MRProblem p = new MRProblem(means, new DenseDoubleMatrix2D(weights), cons);
-
 		// System.out.println(p.toMatlabString());
-
 		MRSolver solver = new MRSolverAJOptimiser();
 		MRSolution s = solver.solve(p);
-
 		assertEquals(623312.662257973, s.getfVal(), 1e-6);
+
+		// Test the tolerance parameter
+		solver.setTolerance(1.0);
+		s = solver.solve(p);
+		assertEquals(623312.662257973, s.getfVal(), 1e-2);
 	}
 
 	@Test
@@ -197,7 +198,7 @@ public class MRTests {
 		MRSolver solver = new MRSolverAJOptimiser();
 		MRSolution solution = solver.solve(p);
 
-		assertEquals(22474.8106931395, solution.getfVal(), 1e-9);
+		assertEquals(22474.8106931395, solution.getfVal(), 1e-5);
 	}
 
 	@Test
@@ -222,7 +223,8 @@ public class MRTests {
 
 	/**
 	 * Test using the Original JOptimizer (normally not applicabble)
-	 * @throws CatastrophicMRFailure 
+	 * 
+	 * @throws CatastrophicMRFailure
 	 */
 	// @Test
 	public void equalityConstraintsTinyOriginalTest() throws CatastrophicMRFailure {
@@ -246,7 +248,8 @@ public class MRTests {
 
 	/**
 	 * Tests overlapping equality cycles
-	 * @throws CatastrophicMRFailure 
+	 * 
+	 * @throws CatastrophicMRFailure
 	 */
 	@Test
 	public void realDataEqualityTest() throws CatastrophicMRFailure {
@@ -281,13 +284,14 @@ public class MRTests {
 
 		MRSolverAJOptimiser solver = new MRSolverAJOptimiser();
 		MRSolution sol = solver.solve(p);
-		assertEquals(23.3255481711711, sol.getfVal(), 1e-8);
+		assertEquals(23.3255481711711, sol.getfVal(), 1e-5);
 	}
 
 	/**
 	 * This test currently fails (due to no inequality constraints). This case
 	 * should never arise in the context of CMR(x) and is therefore not handled
-	 * @throws CatastrophicMRFailure 
+	 * 
+	 * @throws CatastrophicMRFailure
 	 */
 	// @Test
 	public void onlyEqualityTest() throws CatastrophicMRFailure {
@@ -376,7 +380,8 @@ public class MRTests {
 
 	/**
 	 * Tests only a triple cycle
-	 * @throws CatastrophicMRFailure 
+	 * 
+	 * @throws CatastrophicMRFailure
 	 */
 	@Test
 	public void tripleEqualityTest() throws CatastrophicMRFailure {
@@ -419,7 +424,8 @@ public class MRTests {
 
 	/**
 	 * Tests only a triple cycle
-	 * @throws CatastrophicMRFailure 
+	 * 
+	 * @throws CatastrophicMRFailure
 	 */
 	@Test
 	public void quadrupleEqualityTest() throws CatastrophicMRFailure {

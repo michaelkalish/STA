@@ -294,7 +294,7 @@ public class CMRxTests {
 		// System.out.println(a);
 
 		// System.out.println(s.getFStar());
-		assertEquals(0.010700599902264537, s.getFStar(), 1e-8);
+		assertEquals(0.010700599902264537, s.getFStar(), 1e-5);
 	}
 
 	@Test
@@ -327,6 +327,6 @@ public class CMRxTests {
 
 		ParCMRxSolver solver = new ParCMRxSolver();
 		CMRSolution soln = solver.solve(problem, false);
-		assertEquals(0.483454217589317, soln.getFStar(), 1e-8);
+		assertEquals(0.483454217589317, soln.getFStar(), 1e-5);
 	}
 }

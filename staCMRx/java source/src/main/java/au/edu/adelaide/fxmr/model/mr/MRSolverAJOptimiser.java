@@ -10,43 +10,32 @@ import au.edu.adelaide.fxmr.joptimizer.optimizers.PrimalDualMethod;
 import cern.colt.matrix.DoubleMatrix1D;
 import cern.colt.matrix.DoubleMatrix2D;
 import cern.colt.matrix.impl.DenseDoubleMatrix1D;
-import cern.colt.matrix.linalg.Algebra;
-import cern.jet.math.Functions;
 
 /**
  * Solver based on a heavily modified JOptimiser (which can only solve problems
  * of the MR type)
- * 
- * 
  */
-public class MRSolverAJOptimiser implements MRSolver {
-
-	static final double TOL_INIT_FEAS = 1e-11;
-	static final double TOL_INIT = 1e-10;
-	static final double TOL_2_FEAS = 1e-6;
-	static final double TOL_2 = 1e-5;
-	static final double FEAS_DIST = 0.01;
-	static final double FEAS_DIST_2 = 1;
-	// default is 0.55 - for simple problems, 0.8 goes faster
-	static final double BETA = 0.8;
+public class MRSolverAJOptimiser extends MRSolver {
+	private static final double FEAS_DIST = 0.01;
+	private static final double FEAS_DIST_2 = 1;
+	// default is 0.55 - for simple problems, 0.7 generally goes faster
+	private static final double BETA = 0.7;
 	// If it fails the first time, do as many iterations as it takes!
-	static final int ITER_2 = 100000;
-	// This beta should be used when the solution wasn't found
-	static final double BETA_2 = 0.1;
+	private static final int ITER_2 = 100000;
+	// This beta should be used when the solution wasn't found (more iterations
+	// will be required as well)
+	private static final double BETA_2 = 0.1;
 
 	private int free = 0;
-	private int calls;
+
 	private boolean allowCyclicProblems = true;
 
-	public MRSolverAJOptimiser() {
-	}
-
-	public MRSolution solve(MRProblem p) {//throws CatastrophicMRFailure {
+	public MRSolution solve(MRProblem p) {// throws CatastrophicMRFailure {
 		if (p.constraintsAlreadySatisfied()) {
 			// Trivial case
 			return new MRSolution(p, p.getY(), 0, 0);
-		}	
-		
+		}
+
 		int n = p.getN();
 		HashSet<SimpleLinearConstraint> ineq = new HashSet<>();
 		HashSet<SimpleLinearConstraint> eq = new HashSet<>();
@@ -58,35 +47,9 @@ public class MRSolverAJOptimiser implements MRSolver {
 		// Only non-trivial problems count as a "call"
 		calls++;
 
-		// Test to make sure p.getWeights() is symmetric
+		// We assume weights is positive definite and symmetric. If not, this
+		// will probably fail!
 		DoubleMatrix2D weights = p.getWeights();
-
-		DoubleMatrix2D check = p.getWeights().copy();
-		check.assign(p.getWeights().viewDice(), Functions.minus);
-		double normCheck = Algebra.ZERO.normInfinity(check);
-		if (normCheck > 1e-14) {
-			// Force symmetry
-			weights = check;
-			weights.assign(p.getWeights());
-			weights.assign(p.getWeights().viewDice(), Functions.plus);
-			weights.assign(Functions.div(2));
-			if (normCheck > 1e-4) {
-				// Tell the user how bad things are
-				System.err.println("Weights matrix in MRSolverAJOptimiser is not symmetric! InfNorm(W-W^T)=" + normCheck + " forcing");
-			}
-		}
-
-		//check = weights.copy();
-		//check.assign(weights.viewDice(), Functions.minus);
-		//double normCheck2 = Algebra.ZERO.normInfinity(check);
-
-		// Don't bother checking the positive definiteness - we assume what is
-		// passed in is valid!
-		// EigenvalueDecomposition eig = new EigenvalueDecomposition(weights);
-		// for (int i=0;i<weights.rows();i++){
-		// if (eig.getRealEigenvalues().get(i) <= 0)
-		// System.out.println("VERY BAD!");
-		// }
 
 		// inequalities
 		int nIneq = ineq.size();
@@ -114,8 +77,8 @@ public class MRSolverAJOptimiser implements MRSolver {
 		or.setInitialPoint(initial);
 		or.setFi(inequalities);
 		or.setA(eqMat);
-		or.setToleranceFeas(TOL_INIT_FEAS);
-		or.setTolerance(TOL_INIT);
+		or.setToleranceFeas(tolInitFeas);
+		or.setTolerance(tolInit);
 
 		// optimization
 		PrimalDualMethod pdm = new PrimalDualMethod();
@@ -134,16 +97,18 @@ public class MRSolverAJOptimiser implements MRSolver {
 		} catch (Exception e) {
 			// Not too worried at this point - s will be null
 			// e.printStackTrace();
-			//System.out.println(p.toMatlabString());
+			// System.out.println(p.toMatlabString());
 		}
 
-		if (s == null) {
+		boolean failedOnce = s == null;
+
+		if (failedOnce) {
 			// Something went wrong, try more conservative values
 			ineq.clear();
 			eq.clear();
 			initial = p.findFeasibleStart(FEAS_DIST_2, ineq, eq);
-			or.setToleranceFeas(TOL_2_FEAS);
-			or.setTolerance(TOL_2);
+			or.setToleranceFeas(tol2Feas);
+			or.setTolerance(tol2);
 			or.setBeta(BETA_2);
 			or.setMaxIteration(ITER_2);
 			or.setInitialPoint(initial);
@@ -156,8 +121,8 @@ public class MRSolverAJOptimiser implements MRSolver {
 							pdm.getIteration());
 				}
 			} catch (Exception e) {
-				//NOTE: return value will be null!
-				
+				// NOTE: return value will be null!
+
 				// if (!failQuietly) {
 				// System.err.println(
 				// "Exception in optimisation with maxIter=" + ITER_2 + ",
@@ -170,7 +135,6 @@ public class MRSolverAJOptimiser implements MRSolver {
 			}
 		}
 
-
 		// if (s == null && !failQuietly) {
 		// // Something went wrong AGAIN - no idea what to do? :(
 		// System.err.println("Failed optimisation with maxIter=" + ITER_2 + ",
@@ -180,10 +144,10 @@ public class MRSolverAJOptimiser implements MRSolver {
 		// + eqMat.length));
 		// }
 
-		//if (s == null)
-			//when s == null, MR failed catastrophically
-			//throw new CatastrophicMRFailure();
-		
+		// if (s == null)
+		// when s == null, MR failed catastrophically
+		// throw new CatastrophicMRFailure();
+
 		return s;
 	}
 
@@ -202,5 +166,4 @@ public class MRSolverAJOptimiser implements MRSolver {
 	public void setAllowCyclicProblems(boolean allowCyclicProblems) {
 		this.allowCyclicProblems = allowCyclicProblems;
 	}
-
 }

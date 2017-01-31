@@ -10,7 +10,9 @@ import cern.colt.matrix.DoubleFactory2D;
 import cern.colt.matrix.DoubleMatrix1D;
 import cern.colt.matrix.DoubleMatrix2D;
 import cern.colt.matrix.impl.DenseDoubleMatrix2D;
+import cern.colt.matrix.linalg.Algebra;
 import cern.colt.matrix.linalg.SingularValueDecomposition;
+import cern.jet.math.Functions;
 import gnu.trove.set.hash.TIntHashSet;
 
 public class CMRxProblem {
@@ -176,6 +178,9 @@ public class CMRxProblem {
 			}
 		}
 
+		// Force weights to be symmetric
+		forceSymetry();
+
 		DoubleMatrix2D checked = OMUtil.checkRank(model);
 		int[][] vectors = OMUtil.vectors(checked);
 
@@ -214,6 +219,21 @@ public class CMRxProblem {
 			adj = new HashSet[nVar];
 			for (int i = 0; i < nVar; i++)
 				adj[i] = new HashSet<>();
+		}
+	}
+
+	private void forceSymetry() {
+		for (DoubleMatrix2D w : weights) {
+			DoubleMatrix2D check = w.copy();
+			check.assign(w.viewDice(), Functions.minus);
+			double normCheck = Algebra.ZERO.normInfinity(check);
+			if (normCheck > 1e-14) {
+				// Force symmetry
+				check.assign(w);
+				check.assign(w.viewDice(), Functions.plus);
+				check.assign(Functions.div(2));
+				w.assign(check);
+			}
 		}
 	}
 

@@ -10,6 +10,7 @@ import java.util.concurrent.TimeUnit;
 import au.edu.adelaide.fxmr.data.GeneralModel;
 import au.edu.adelaide.fxmr.joptimizer.functions.SimpleLinearConstraint;
 import au.edu.adelaide.fxmr.model.mr.MRProblem;
+import au.edu.adelaide.fxmr.model.mr.MRSolver;
 import au.edu.adelaide.fxmr.model.mr.MRSolverAJOptimiser;
 import cern.colt.matrix.DoubleMatrix2D;
 
@@ -55,17 +56,17 @@ public class CMRxGMFits implements Fits {
 
 	public CMRxGMFits(int nSample, GeneralModel gm, DoubleMatrix2D model, HashSet<SimpleLinearConstraint>[] adj,
 			int proc) {
-		this(nSample, gm, 0, true, model, adj, proc, false, null, false);
+		this(nSample, gm, 0, true, model, adj, proc, false, null, false, MRSolver.TOL1, MRSolver.TOL2);
 	}
 
 	public CMRxGMFits(int nSample, GeneralModel gm, double shrinkage, DoubleMatrix2D model,
 			HashSet<SimpleLinearConstraint>[] adj, int proc, boolean cheapP, boolean onlySTAMR) {
-		this(nSample, gm, shrinkage, shrinkage < 0, model, adj, proc, cheapP, null, onlySTAMR);
+		this(nSample, gm, shrinkage, shrinkage < 0, model, adj, proc, cheapP, null, onlySTAMR, MRSolver.TOL1, MRSolver.TOL2);
 	}
 
 	public CMRxGMFits(int nSample, GeneralModel gm, double shrinkage, DoubleMatrix2D model,
-			HashSet<SimpleLinearConstraint>[] adj, int proc, boolean cheapP, FitListener listner) {
-		this(nSample, gm, shrinkage, shrinkage < 0, model, adj, proc, cheapP, listner, false);
+			HashSet<SimpleLinearConstraint>[] adj, int proc, boolean cheapP, FitListener listner, double mrTol1, double mrTol2) {
+		this(nSample, gm, shrinkage, shrinkage < 0, model, adj, proc, cheapP, listner, false, mrTol1, mrTol2);
 	}
 
 	/**
@@ -77,7 +78,8 @@ public class CMRxGMFits implements Fits {
 	 * @param cheapP
 	 */
 	private CMRxGMFits(int nSample, GeneralModel gm, double shrinkage, boolean autoShrink, DoubleMatrix2D model,
-			HashSet<SimpleLinearConstraint>[] adj, int proc, boolean cheapP, FitListener listener, boolean onlySTAMR) {
+			HashSet<SimpleLinearConstraint>[] adj, int proc, boolean cheapP, FitListener listener, boolean onlySTAMR, double mrTolerance1,
+			double mrTolerance2) {
 		this.gm = gm;
 		this.model = model;
 		this.shrinkage = shrinkage;
@@ -94,6 +96,8 @@ public class CMRxGMFits implements Fits {
 		else
 			solver = new CMRxSolver();
 		solver.setEasyFail(true);
+		solver.setMrTolerance1(mrTolerance1);
+		solver.setMrTolerance2(mrTolerance2);
 
 		double[][][][] ybSource = new double[nVar][nCond][][];
 		int[] nVarSamples = new int[nVar];
@@ -121,9 +125,11 @@ public class CMRxGMFits implements Fits {
 
 		if (adj != null && adj.length > 0 && !onlySTAMR) {
 			MRSolverAJOptimiser mrSolver = new MRSolverAJOptimiser();
+			mrSolver.setTolerance(mrTolerance1, mrTolerance2);
 			// Take away MR from dataFit
 			for (int v = 0; v < nVar; v++) {
 				MRProblem problem = new MRProblem(csSTAmeans[v], weights[v], adj[v]);
+				problem.forceSymetry();
 				dataFit -= mrSolver.solve(problem).getfVal();
 			}
 		}
@@ -175,14 +181,9 @@ public class CMRxGMFits implements Fits {
 			long start = System.nanoTime();
 			boolean needSoln = true;
 			int attempts = 0;
-			
-			long seed = 1485438868344l;//System.currentTimeMillis();
-			Random rand = new Random(seed );
-			
+
 			while (needSoln && running) {
 				attempts++;
-				if (attempts > 1)
-					System.out.println("bad " + index);
 
 				// Bootstrap from ybSource
 				GeneralModel tmpGeneralModel = gm.bootStrap(rand);
@@ -223,8 +224,6 @@ public class CMRxGMFits implements Fits {
 
 			times[index] = (System.nanoTime() - start) / 1000000000.0;
 			badnesses[index] = worst;
-
-			System.out.println(index + ",\tsecs = " + times[index] + ",\tseed = " + seed);
 
 			if (listener != null && System.currentTimeMillis() > nextUpdate) {
 				running = listener.updateStatus(fits, dataFit);

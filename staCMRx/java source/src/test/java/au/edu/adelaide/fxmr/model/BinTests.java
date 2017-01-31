@@ -153,7 +153,7 @@ public class BinTests {
 
 		for (int i = 0; i < binModel.getnSubj(); i++) {
 			assertEquals(gExpected[i], solns[i].getG2Star(), 1e-6);
-			assertEquals(fExpected[i], solns[i].getFStar(), 1e-7);
+			assertEquals(fExpected[i], solns[i].getFStar(), 1e-6);
 
 			assertArrayEquals(xExpected[i][0], solns[i].getXStar(0), 1e-7);
 			assertArrayEquals(xExpected[i][1], solns[i].getXStar(1), 1e-7);

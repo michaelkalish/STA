@@ -1,6 +1,8 @@
 package au.edu.adelaide.fxmr.model;
 
 import cern.colt.matrix.DoubleMatrix2D;
+import cern.colt.matrix.linalg.Algebra;
+import cern.jet.math.Functions;
 
 public class CMRProblem {
 	private int[][] rangeSet;
@@ -13,6 +15,22 @@ public class CMRProblem {
 		this.rangeSet = rangeSet;
 		this.weights = weights;
 		this.nVar = means.length;
+		forceSymetry();
+	}
+
+	private void forceSymetry() {
+		for (DoubleMatrix2D w : weights) {
+			DoubleMatrix2D check = w.copy();
+			check.assign(w.viewDice(), Functions.minus);
+			double normCheck = Algebra.ZERO.normInfinity(check);
+			if (normCheck > 1e-14) {
+				// Force symmetry
+				check.assign(w);
+				check.assign(w.viewDice(), Functions.plus);
+				check.assign(Functions.div(2));
+				w.assign(check);
+			}
+		}
 	}
 
 	public CMRProblem(CombinedStatsSTA[] stats, int[][] rangeSet) {

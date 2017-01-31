@@ -54,13 +54,8 @@ public class GeneralModel {
 		for (int i = 0; i < n; i++) {
 			CombinedStatsSTA curStats = stats[i];
 			MRProblem problem = new MRProblem(curStats.getMeans().toArray(), curStats.getWeights(), rangeSet);
-			//try {
-				solutions[i] = solver.solve(problem);
-//			} catch (CatastrophicMRFailure e) {
-//				if (!flagForceShrink)
-//					// Try again with shrink = 1
-//					return calcStaMR(stats, rangeSet, 1, false, true);
-//			}
+			problem.forceSymetry();
+			solutions[i] = solver.solve(problem);
 		}
 
 		return solutions;

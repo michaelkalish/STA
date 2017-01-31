@@ -11,10 +11,7 @@ package au.edu.adelaide.fxmr.model.mr;
  * 
  * 
  */
-public class MRSolverOJAlgo implements MRSolver {
-	public MRSolverOJAlgo() {
-	}
-
+public class MRSolverOJAlgo extends MRSolver {
 	public MRSolution solve(MRProblem p) {
 		return null;
 	}
@@ -73,11 +70,4 @@ public class MRSolverOJAlgo implements MRSolver {
 	//
 	// return retVal;
 	// }
-
-	@Override
-	public int getCalls() {
-		return 0;
-	}
-
-
 }

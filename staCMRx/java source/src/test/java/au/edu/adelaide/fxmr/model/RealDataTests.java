@@ -58,7 +58,7 @@ public class RealDataTests {
 
 		CMRSolution sol = solver.solve(problem, false);
 		// With Fast implementation
-		assertEquals(136.3192329017816, sol.getFStar(), 1e-15);
+		assertEquals(136.3192329017816, sol.getFStar(), 1e-5);
 		// With JOptimizer original
 		// assertEquals(136.31923290183096, sol.getFStar(), 1e-15);
 	}

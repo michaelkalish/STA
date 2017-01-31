@@ -9,6 +9,8 @@ import au.edu.adelaide.fxmr.joptimizer.functions.SimpleLinearConstraint;
 import cern.colt.matrix.DoubleFactory2D;
 import cern.colt.matrix.DoubleMatrix2D;
 import cern.colt.matrix.impl.SparseDoubleMatrix2D;
+import cern.colt.matrix.linalg.Algebra;
+import cern.jet.math.Functions;
 
 /**
  * Defines the input for the MR problem
@@ -186,7 +188,8 @@ public class MRProblem implements Cloneable {
 	}
 
 	/**
-	 * Treat matIneq as a Directed Graph and create a feasible initial starting point.
+	 * Treat matIneq as a Directed Graph and create a feasible initial starting
+	 * point.
 	 * 
 	 * IF there is a cycle in the graph, we need to add constraints to MatEq and
 	 * remove them from matIneq (i.e., this method can change the underlying
@@ -240,7 +243,7 @@ public class MRProblem implements Cloneable {
 			}
 		}
 		cycle = null;
-		
+
 		if (cycleSets == null) {
 			// Simplest case
 			return findAcyclicStart(meand, ineq, used, n);
@@ -419,5 +422,18 @@ public class MRProblem implements Cloneable {
 
 	public boolean constraintsAlreadySatisfied() {
 		return testFeas(y);
+	}
+
+	public void forceSymetry() {
+		DoubleMatrix2D check = weights.copy();
+		check.assign(weights.viewDice(), Functions.minus);
+		double normCheck = Algebra.ZERO.normInfinity(check);
+		if (normCheck > 1e-14) {
+			// Force symmetry
+			check.assign(weights);
+			check.assign(weights.viewDice(), Functions.plus);
+			check.assign(Functions.div(2));
+			weights.assign(check);
+		}
 	}
 }

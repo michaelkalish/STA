@@ -39,6 +39,7 @@ public class STASolver extends CMRxSolver {
 		double fBar = 0;
 		for (int i = 0; i < nvar; i++) {
 			MRProblem p = new MRProblem(means[i], weights[i], problem.getAdj()[i]);
+			p.forceSymetry();
 			MRSolution sol = mrSolver.solve(p);
 			xBar[i] = sol.getxVector();
 			fBar += sol.getfVal();
