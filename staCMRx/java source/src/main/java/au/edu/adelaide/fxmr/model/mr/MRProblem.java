@@ -14,8 +14,6 @@ import cern.jet.math.Functions;
 
 /**
  * Defines the input for the MR problem
- * 
- * @author luke
  */
 public class MRProblem implements Cloneable {
 	/**

@@ -2,8 +2,6 @@ package au.edu.adelaide.fxmr.model;
 
 import static org.junit.Assert.assertEquals;
 
-import org.junit.Test;
-
 public class Data4DTests {
 	double[][][][] data = { { { { 1, 0.25 }, { 1, 1 }, { 0.75, 1 }, { 0.75, 1 }, { 1, 1 }, { 1, 1 }, { 1, 1 }, { 1, 1 }, { 1, 1 }, { 1, 1 },
 			{ 1, 1 }, { 1, 1 }, { 1, 1 }, { 1, 1 }, { 1, 1 }, { 1, 1 }, { 1, 1 }, { 1, 1 }, { 1, 1 }, { 1, 0.75 }, { 1, 1 }, { 1, 0.5 },

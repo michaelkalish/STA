@@ -13,6 +13,7 @@ import au.edu.adelaide.fxmr.model.mr.MRProblem;
 import au.edu.adelaide.fxmr.model.mr.MRSolver;
 import au.edu.adelaide.fxmr.model.mr.MRSolverAJOptimiser;
 import cern.colt.matrix.DoubleMatrix2D;
+import cern.colt.matrix.impl.DenseDoubleMatrix2D;
 
 public class CMRxGMFits implements Fits {
 	private double[] fits;
@@ -67,6 +68,11 @@ public class CMRxGMFits implements Fits {
 	public CMRxGMFits(int nSample, GeneralModel gm, double shrinkage, DoubleMatrix2D model,
 			HashSet<SimpleLinearConstraint>[] adj, int proc, boolean cheapP, FitListener listner, double mrTol1, double mrTol2) {
 		this(nSample, gm, shrinkage, shrinkage < 0, model, adj, proc, cheapP, listner, false, mrTol1, mrTol2);
+	}
+
+	public CMRxGMFits(int nSample, GeneralModel gm, double shrink, DenseDoubleMatrix2D denseDoubleMatrix2D,
+			HashSet<SimpleLinearConstraint>[] dMatAs, int proc, boolean cheapP2, boolean onlySTAMR, double mrTol1, double mrTol2) {
+		this(nSample, gm, shrink, onlySTAMR, denseDoubleMatrix2D, dMatAs, proc, cheapP2, null, onlySTAMR, mrTol1, mrTol2);
 	}
 
 	/**
@@ -180,11 +186,7 @@ public class CMRxGMFits implements Fits {
 		public void run() {
 			long start = System.nanoTime();
 			boolean needSoln = true;
-			int attempts = 0;
-
 			while (needSoln && running) {
-				attempts++;
-
 				// Bootstrap from ybSource
 				GeneralModel tmpGeneralModel = gm.bootStrap(rand);
 

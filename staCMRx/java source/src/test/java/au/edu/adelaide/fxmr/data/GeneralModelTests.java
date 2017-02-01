@@ -16,7 +16,6 @@ import au.edu.adelaide.fxmr.model.CMRxProblemMaker;
 import au.edu.adelaide.fxmr.model.CMRxSolver;
 import au.edu.adelaide.fxmr.model.CombinedStatsSTA;
 import au.edu.adelaide.fxmr.model.ParCMRxSolver;
-import au.edu.adelaide.fxmr.model.StatsSTA;
 import au.edu.adelaide.fxmr.model.mr.MRSolution;
 import cern.colt.matrix.DoubleMatrix2D;
 import cern.colt.matrix.impl.DenseDoubleMatrix2D;

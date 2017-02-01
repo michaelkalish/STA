@@ -21,7 +21,6 @@ import au.edu.adelaide.fxmr.joptimizer.functions.SimpleLinearConstraint;
 import au.edu.adelaide.fxmr.joptimizer.util.Utils;
 import cern.colt.matrix.DoubleMatrix1D;
 import cern.colt.matrix.DoubleMatrix2D;
-import cern.jet.math.Functions;
 
 /**
  * Cholesky L.L[T] factorization and inverse for symmetric and positive matrix:

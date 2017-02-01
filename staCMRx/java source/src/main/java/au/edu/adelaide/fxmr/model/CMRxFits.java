@@ -39,11 +39,11 @@ public class CMRxFits implements Fits {
 	}
 
 	public CMRxFits(int nSample, CMRxFitsProblem problem, double shrink, int proc) {
-		this(nSample, problem, shrink, proc, false, false);
+		this(nSample, problem, shrink, proc, false, false, 0, 0);
 	}
 
 	public CMRxFits(int nSample, CMRxFitsProblem problem, double shrink, int proc, boolean cheapP) {
-		this(nSample, problem, shrink, proc, cheapP, false);
+		this(nSample, problem, shrink, proc, cheapP, false, 0, 0);
 	}
 
 	/**
@@ -53,7 +53,8 @@ public class CMRxFits implements Fits {
 	 * @param problem
 	 * @param proc
 	 */
-	public CMRxFits(int nSample, CMRxFitsProblem problem, double shrink, int proc, boolean cheapP, boolean onlySTAMR) {
+	public CMRxFits(int nSample, CMRxFitsProblem problem, double shrink, int proc, boolean cheapP, boolean onlySTAMR, double mrTol1,
+			double mrTol2) {
 		this.problem = problem;
 		this.shrink = shrink;
 		this.cheapP = cheapP;
@@ -63,6 +64,8 @@ public class CMRxFits implements Fits {
 			solver = new STASolver();
 		else
 			solver = new CMRxSolver();
+		solver.setMrTolerance1(mrTol1);
+		solver.setMrTolerance2(mrTol2);
 
 		CMRSolution initSoln = solver.solve(problem);
 		dataFit = initSoln.getFStar();
@@ -71,6 +74,7 @@ public class CMRxFits implements Fits {
 		HashSet<SimpleLinearConstraint>[] adj = problem.getAdj();
 		if (adj != null && adj.length > 0 && !onlySTAMR) {
 			MRSolverAJOptimiser mrSolver = new MRSolverAJOptimiser();
+			mrSolver.setTolerance(mrTol1, mrTol2);
 			// Take away MR from dataFit
 			for (int v = 0; v < problem.getNVar(); v++) {
 				if (adj[v].size() > 0) {

@@ -1,7 +1,5 @@
 package au.edu.adelaide.fxmr.model;
 
-import javax.sound.midi.SysexMessage;
-
 import au.edu.adelaide.fxmr.model.mr.MRUtil;
 import cern.colt.matrix.DoubleFactory2D;
 import cern.colt.matrix.DoubleMatrix1D;
@@ -9,7 +7,6 @@ import cern.colt.matrix.DoubleMatrix2D;
 import cern.colt.matrix.impl.DenseDoubleMatrix2D;
 import cern.colt.matrix.linalg.Algebra;
 import cern.colt.matrix.linalg.EigenvalueDecomposition;
-import cern.colt.matrix.linalg.SingularValueDecomposition;
 import cern.jet.math.Functions;
 
 /**

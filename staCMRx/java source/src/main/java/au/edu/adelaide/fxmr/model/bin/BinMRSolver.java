@@ -11,8 +11,6 @@ import au.edu.adelaide.fxmr.model.mr.MRSolverAJOptimiser;
 /**
  * Same as BinCMRSolver but without the coupling (mostly for use with
  * binCMRFits)
- * 
- * @author luke
  *
  */
 public class BinMRSolver extends BinCMRSolver {

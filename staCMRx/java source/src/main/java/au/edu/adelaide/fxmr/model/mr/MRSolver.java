@@ -40,7 +40,8 @@ public abstract class MRSolver {
 	}
 
 	/**
-	 * Change the tolerance.
+	 * Change the tolerance. If zero is passed in, reset the tolerance
+	 * (convenience behaviour)
 	 * 
 	 * @param tol1
 	 *            the initial tolerance to use
@@ -49,9 +50,13 @@ public abstract class MRSolver {
 	 *            other more conservative parameters
 	 */
 	public void setTolerance(double tol1, double tolSecond) {
-		tolInitFeas = tol1;
-		tolInit = tol1 * 10;
-		tol2Feas = tolSecond;
-		tol2 = tolSecond * 10;
+		if (tol1 <= 0) {
+			resetTolerance();
+		} else {
+			tolInitFeas = tol1;
+			tolInit = tol1 * 10;
+			tol2Feas = tolSecond;
+			tol2 = tolSecond * 10;
+		}
 	}
 }

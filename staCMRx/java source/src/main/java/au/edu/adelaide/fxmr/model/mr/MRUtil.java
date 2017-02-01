@@ -2,10 +2,8 @@ package au.edu.adelaide.fxmr.model.mr;
 
 import cern.colt.matrix.DoubleMatrix1D;
 import cern.colt.matrix.DoubleMatrix2D;
-import cern.colt.matrix.doublealgo.Statistic;
 import cern.colt.matrix.impl.DenseDoubleMatrix1D;
 import cern.colt.matrix.impl.DenseDoubleMatrix2D;
-import cern.colt.matrix.linalg.Algebra;
 import cern.colt.matrix.linalg.EigenvalueDecomposition;
 
 /**

@@ -1,18 +1,13 @@
 package au.edu.adelaide.fxmr.model;
 
-import static org.junit.Assert.*;
-
-import java.util.DoubleSummaryStatistics;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
 import org.junit.Test;
 
-import au.edu.adelaide.fxmr.data.GeneralModel;
 import au.edu.adelaide.fxmr.model.mr.MRUtil;
 import cern.colt.matrix.DoubleMatrix2D;
-import cern.colt.matrix.doublealgo.Statistic;
 import cern.colt.matrix.impl.DenseDoubleMatrix2D;
-import cern.colt.matrix.linalg.Algebra;
-import cern.jet.math.Functions;
 
 public class KaitlynTests {
 
@@ -122,12 +117,12 @@ public class KaitlynTests {
 		for (double[][] m : allModels) {
 			long start = System.nanoTime();
 			maker.setModel(m);
-			Fits f = maker.solve(2, -1, false);
+			Fits f = maker.solve(2, -1, false, 0, 0);
 			// System.out.print(f.getP() + "\t" + (System.nanoTime() - start) /
 			// 1000000000.0);
 
 			start = System.nanoTime();
-			f = maker.solve(2, -1, true);
+			f = maker.solve(2, -1, true, 0, 0);
 			// System.out.println("\t" + f.getP() + "\t" + (System.nanoTime() -
 			// start) / 1000000000.0);
 		}

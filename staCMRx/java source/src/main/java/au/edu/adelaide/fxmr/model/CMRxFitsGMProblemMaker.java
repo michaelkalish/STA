@@ -41,22 +41,22 @@ public class CMRxFitsGMProblemMaker extends CMRxProblemMaker {
 	}
 
 	public Fits solve(int nSample, int proc) {
-		return solve(nSample, proc, false);
+		return solve(nSample, proc, false, 0, 0);
 	}
 
 	@SuppressWarnings("unchecked")
-	public Fits solve(int nSample, int proc, boolean cheapP) {
+	public Fits solve(int nSample, int proc, boolean cheapP, double mrTol1, double mrTol2) {
 		HashSet<SimpleLinearConstraint>[] dMatAs = null;
 		if (matAs.size() > 0) {
 			dMatAs = new HashSet[matAs.size()];
 			matAs.toArray(dMatAs);
 		}
 
-		return new CMRxGMFits(nSample, gm, shrink, new DenseDoubleMatrix2D(model), dMatAs, proc, cheapP, false);
+		return new CMRxGMFits(nSample, gm, shrink, new DenseDoubleMatrix2D(model), dMatAs, proc, cheapP, false, mrTol1, mrTol2);
 	}
 
 	@SuppressWarnings("unchecked")
-	public Fits solve(int nSample, int proc, boolean cheapP, boolean onlySTAMR) {
+	public Fits solve(int nSample, int proc, boolean cheapP, boolean onlySTAMR, double mrTol1, double mrTol2) {
 		HashSet<SimpleLinearConstraint>[] dMatAs = null;
 		if (matAs.size() > 0) {
 			dMatAs = new HashSet[matAs.size()];
@@ -66,9 +66,9 @@ public class CMRxFitsGMProblemMaker extends CMRxProblemMaker {
 		if (model == null) {
 			// This implies the CMRxFitsProblem will be used in non-coupled
 			// mode.
-			model = new double[][]{{1}};
+			model = new double[][] { { 1 } };
 		}
 
-		return new CMRxGMFits(nSample, gm, shrink, new DenseDoubleMatrix2D(model), dMatAs, proc, cheapP, onlySTAMR);
+		return new CMRxGMFits(nSample, gm, shrink, new DenseDoubleMatrix2D(model), dMatAs, proc, cheapP, onlySTAMR, mrTol1, mrTol2);
 	}
 }

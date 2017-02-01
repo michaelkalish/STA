@@ -50,6 +50,8 @@ public class ParCMRxSolver {
 	private int grabEnd = -1;
 	private int cyclesAvoided;
 	private boolean catastrophicFailure;
+	protected double mrTolerance1 = 0;
+	protected double mrTolerance2 = 0;
 
 	public ParCMRxSolver() {
 	}
@@ -98,6 +100,7 @@ public class ParCMRxSolver {
 		visited = new VisitedSet();
 
 		MRSolverAJOptimiser mrSolver = new MRSolverAJOptimiser();
+		mrSolver.setTolerance(mrTolerance1, mrTolerance2);
 		mrSolver.setAllowCyclicProblems(allowCyclic);
 
 		// Add first CMRxTrial
@@ -346,5 +349,21 @@ public class ParCMRxSolver {
 
 	public boolean isCatastrophicFailure() {
 		return catastrophicFailure;
+	}
+
+	public double getMrTolerance1() {
+		return mrTolerance1;
+	}
+
+	public void setMrTolerance1(double mrTolerance1) {
+		this.mrTolerance1 = mrTolerance1;
+	}
+
+	public double getMrTolerance2() {
+		return mrTolerance2;
+	}
+
+	public void setMrTolerance2(double mrTolerance2) {
+		this.mrTolerance2 = mrTolerance2;
 	}
 }

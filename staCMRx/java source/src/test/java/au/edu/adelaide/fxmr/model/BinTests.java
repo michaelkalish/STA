@@ -13,7 +13,6 @@ import au.edu.adelaide.fxmr.model.bin.BinCMRFits;
 import au.edu.adelaide.fxmr.model.bin.BinCMRSolver;
 import au.edu.adelaide.fxmr.model.bin.BinProblem;
 import au.edu.adelaide.fxmr.model.bin.BinSolution;
-import cern.colt.Arrays;
 
 public class BinTests {
 

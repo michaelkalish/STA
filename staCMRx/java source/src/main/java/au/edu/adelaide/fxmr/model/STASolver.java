@@ -11,8 +11,6 @@ import cern.colt.matrix.DoubleMatrix2D;
  * 
  * Extends Single threaded CMRSolver for use as a dropin replacement for
  * CMRxfits
- * 
- * @author luke
  */
 
 public class STASolver extends CMRxSolver {
@@ -20,7 +18,8 @@ public class STASolver extends CMRxSolver {
 	}
 
 	/**
-	 * Override the most parameterised function and ignore all but the first parameter
+	 * Override the most parameterised function and ignore all but the first
+	 * parameter
 	 */
 	public CMRSolution solve(CMRxProblem problem, SolverListener sl, boolean targetSet, double target) {
 		long start = System.nanoTime();
@@ -32,7 +31,7 @@ public class STASolver extends CMRxSolver {
 		double[][] xBar = null;
 
 		MRSolver mrSolver = new MRSolverAJOptimiser();
-
+		mrSolver.setTolerance(mrTolerance1, mrTolerance2);
 		// Add first CMRTrial
 
 		xBar = new double[nvar][];

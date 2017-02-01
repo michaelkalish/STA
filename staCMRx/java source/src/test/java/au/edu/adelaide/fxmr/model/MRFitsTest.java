@@ -2,8 +2,6 @@ package au.edu.adelaide.fxmr.model;
 
 import static org.junit.Assert.assertTrue;
 
-import java.util.Arrays;
-
 import org.junit.Test;
 
 import au.edu.adelaide.fxmr.data.GeneralModel;
@@ -265,7 +263,7 @@ public class MRFitsTest {
 			for (int var = 0; var < nvar; var++)
 				problem.addCell(group, var, data[group][var]);
 
-		Fits sol = problem.solve(200, -1, false, true);
+		Fits sol = problem.solve(200, -1, false, true, 0, 0);
 
 		// Be careful - it's possible these may fail and that's ok (sometimes)
 		assertTrue(sol.getP() > 0.04);
@@ -305,9 +303,9 @@ public class MRFitsTest {
 		problem.addAdj(nCond, index, new int[] { 7, 8, 9, 10, 11, 12 });
 		problem.dupeAdj(nvar);
 
-		Fits sol = new CMRxFits(200, problem.getProblem(), -1, 0, false, true);
+		Fits sol = new CMRxFits(200, problem.getProblem(), -1, 0, false, true, 0, 0);
 
-		//System.out.println(sol.getP());
+		// System.out.println(sol.getP());
 		// System.out.println(sol.getDataFit());
 		// System.out.println(Arrays.toString(sol.getFits()));
 

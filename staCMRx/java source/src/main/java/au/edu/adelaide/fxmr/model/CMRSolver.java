@@ -59,8 +59,7 @@ public class CMRSolver {
 		TreeSet<CMRTrial> remaining = new TreeSet<>();
 
 		MRSolver mrSolver = new MRSolverAJOptimiser();
-		if (mrTolerance1 != 0)
-			mrSolver.setTolerance(mrTolerance1, mrTolerance2);
+		mrSolver.setTolerance(mrTolerance1, mrTolerance2);
 
 		// Add first CMRTrial
 		remaining.add(new CMRTrial(problem.getRangeSet(), nvar, weights, means));

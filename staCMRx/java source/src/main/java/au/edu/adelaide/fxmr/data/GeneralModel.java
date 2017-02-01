@@ -8,7 +8,6 @@ import java.util.Random;
 import au.edu.adelaide.fxmr.model.Badness;
 import au.edu.adelaide.fxmr.model.CombinedStatsSTA;
 import au.edu.adelaide.fxmr.model.StatsSTA;
-import au.edu.adelaide.fxmr.model.mr.CatastrophicMRFailure;
 import au.edu.adelaide.fxmr.model.mr.MRProblem;
 import au.edu.adelaide.fxmr.model.mr.MRSolution;
 import au.edu.adelaide.fxmr.model.mr.MRSolver;
@@ -48,6 +47,7 @@ public class GeneralModel {
 			rangeSet = new int[][] { rangeSet0 };
 		}
 
+		// Note default MR tolerance used.
 		MRSolver solver = new MRSolverAJOptimiser();
 		int n = stats.length;
 		MRSolution[] solutions = new MRSolution[n];

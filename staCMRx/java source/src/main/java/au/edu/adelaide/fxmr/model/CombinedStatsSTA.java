@@ -4,8 +4,6 @@ import cern.colt.matrix.DoubleFactory1D;
 import cern.colt.matrix.DoubleFactory2D;
 import cern.colt.matrix.DoubleMatrix1D;
 import cern.colt.matrix.DoubleMatrix2D;
-import cern.colt.matrix.linalg.Algebra;
-import cern.jet.math.Functions;
 
 /**
  * Used by the GeneralModel, cumulate statistics for all data from multiple

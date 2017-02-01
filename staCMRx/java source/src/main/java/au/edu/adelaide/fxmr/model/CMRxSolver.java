@@ -24,8 +24,8 @@ public class CMRxSolver {
 	private boolean easyFail;
 	private boolean allowCyclic = true;
 	private double tolerance = 0;
-	private double mrTolerance1 = 0;
-	private double mrTolerance2 = 0;
+	protected double mrTolerance1 = 0;
+	protected double mrTolerance2 = 0;
 
 	public CMRxSolver() {
 	}
@@ -68,7 +68,6 @@ public class CMRxSolver {
 		TIntHashSet infeasZones = problem.getInfeasZones();
 		int[] infeas = isFeasible3n(problem.getMeans(), infeasZones, tmpVolumes, tmpZoneNumbers);
 		HashSet<SimpleLinearConstraint>[] adjBar = null;
-		int collisions = 0;
 		int cyclicAvoided = 0;
 
 		if (infeas == null)
@@ -78,8 +77,7 @@ public class CMRxSolver {
 		TreeSet<CMRxTrial> remaining = new TreeSet<>();
 
 		MRSolverAJOptimiser mrSolver = new MRSolverAJOptimiser();
-		if (mrTolerance1 != 0)
-			mrSolver.setTolerance(mrTolerance1, mrTolerance2);
+		mrSolver.setTolerance(mrTolerance1, mrTolerance2);
 
 		// mrSolver.setFailQuietly(easyFail);
 		mrSolver.setAllowCyclicProblems(allowCyclic);
@@ -193,9 +191,7 @@ public class CMRxSolver {
 										newTrial.addConstraint(k, negIndex, posIndex);
 								}
 
-								if (visited.contains(newTrial)) {
-									collisions++;
-								} else {
+								if (!visited.contains(newTrial)) {
 									remaining.add(newTrial);
 									visited.add(newTrial);
 								}

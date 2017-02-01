@@ -2,12 +2,10 @@ package au.edu.adelaide.fxmr.model;
 
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertTrue;
 
 import org.junit.Test;
 
-import au.edu.adelaide.fxmr.model.mr.MRUtil;
 import cern.colt.matrix.DoubleMatrix2D;
 import cern.colt.matrix.impl.DenseDoubleMatrix2D;
 

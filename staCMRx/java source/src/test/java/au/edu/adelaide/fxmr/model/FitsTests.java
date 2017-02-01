@@ -3,13 +3,11 @@ package au.edu.adelaide.fxmr.model;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
-import java.util.HashSet;
 import java.util.Random;
 
 import org.junit.Test;
 
 import au.edu.adelaide.fxmr.data.GeneralModel;
-import au.edu.adelaide.fxmr.joptimizer.functions.SimpleLinearConstraint;
 import cern.colt.matrix.DoubleFactory2D;
 import cern.colt.matrix.DoubleMatrix2D;
 import cern.colt.matrix.impl.DenseDoubleMatrix1D;

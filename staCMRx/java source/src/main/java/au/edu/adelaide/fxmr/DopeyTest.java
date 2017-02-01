@@ -12,6 +12,10 @@ import cern.colt.matrix.DoubleFactory2D;
 import cern.colt.matrix.DoubleMatrix2D;
 import cern.jet.math.Functions;
 
+/**
+ * Simple test of asymptotic performance
+ *
+ */
 public class DopeyTest {
 	private double corCov;
 	private DoubleMatrix2D[] weights;
