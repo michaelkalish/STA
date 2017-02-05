@@ -44,6 +44,11 @@ public class CMRxFitsGMProblemMaker extends CMRxProblemMaker {
 		return solve(nSample, proc, false, 0, 0);
 	}
 
+	public Fits solve(int nSample, int proc, boolean cheapP){
+		return solve(nSample, proc, cheapP, 0, 0);
+	}
+	
+	
 	@SuppressWarnings("unchecked")
 	public Fits solve(int nSample, int proc, boolean cheapP, double mrTol1, double mrTol2) {
 		HashSet<SimpleLinearConstraint>[] dMatAs = null;
@@ -55,6 +60,10 @@ public class CMRxFitsGMProblemMaker extends CMRxProblemMaker {
 		return new CMRxGMFits(nSample, gm, shrink, new DenseDoubleMatrix2D(model), dMatAs, proc, cheapP, false, mrTol1, mrTol2);
 	}
 
+	public Fits solve(int nSample, int proc, boolean cheapP, boolean onlySTAMR) {
+		return solve(nSample, proc, cheapP, onlySTAMR, 0, 0);
+	}
+	
 	@SuppressWarnings("unchecked")
 	public Fits solve(int nSample, int proc, boolean cheapP, boolean onlySTAMR, double mrTol1, double mrTol2) {
 		HashSet<SimpleLinearConstraint>[] dMatAs = null;

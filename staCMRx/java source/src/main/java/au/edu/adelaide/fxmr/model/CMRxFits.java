@@ -46,6 +46,10 @@ public class CMRxFits implements Fits {
 		this(nSample, problem, shrink, proc, cheapP, false, 0, 0);
 	}
 
+	public CMRxFits(int nSample, CMRxFitsProblem problem, double shrink, int proc, boolean cheapP, boolean onlySTAMR) {
+		this(nSample, problem, shrink, proc, cheapP, onlySTAMR, 0, 0);
+	}
+
 	/**
 	 * Do a parametric fit (original data not available)
 	 * 

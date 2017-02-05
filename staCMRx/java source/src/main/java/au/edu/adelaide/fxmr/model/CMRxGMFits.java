@@ -125,7 +125,16 @@ public class CMRxGMFits implements Fits {
 
 		CMRxProblem initProblem = new CMRxProblem(csSTAmeans, weights, adj, model);
 		// Use parallel solver for first solution
-		CMRSolution initSoln = onlySTAMR ? solver.solve(initProblem) : new ParCMRxSolver().solve(initProblem);
+		CMRSolution initSoln;
+		if (onlySTAMR) {
+			initSoln = solver.solve(initProblem);
+		} else {
+			ParCMRxSolver parSolver = new ParCMRxSolver();
+			parSolver.setMrTolerance1(mrTolerance1);
+			parSolver.setMrTolerance2(mrTolerance2);
+			initSoln = parSolver.solve(initProblem);
+		}
+
 		dataFit = initSoln.getFStar();
 		initSoln = null;
 
@@ -225,6 +234,9 @@ public class CMRxGMFits implements Fits {
 			}
 
 			times[index] = (System.nanoTime() - start) / 1000000000.0;
+
+			System.out.println(times[index]);
+
 			badnesses[index] = worst;
 
 			if (listener != null && System.currentTimeMillis() > nextUpdate) {

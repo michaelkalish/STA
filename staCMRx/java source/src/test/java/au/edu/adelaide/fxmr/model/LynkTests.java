@@ -520,6 +520,7 @@ public class LynkTests {
 		assertEquals(36.3013317467459, sol.getFStar(), 1e-7);
 	}
 
+	@Test
 	public void fitTestHuge() {
 		CMRxGMProblemMaker maker = new CMRxGMProblemMaker();
 		maker.setShrink(-1);
@@ -532,6 +533,6 @@ public class LynkTests {
 
 		// 10 = 73s
 		// 100 = 562s
-		CMRxGMFits fits = new CMRxGMFits(10, maker.getGm(), model, p.getAdj(), -1);
+		CMRxGMFits fits = new CMRxGMFits(10000, maker.getGm(), -1, model, p.getAdj(), -1, false, null, 1e-6, 1e-3);
 	}
 }
