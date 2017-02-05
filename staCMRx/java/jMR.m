@@ -1,4 +1,4 @@
-function [x, fit] = jMR(y, W, E)
+function [x, fit] = jMR(y, W, E, mrTol)
 % function [x, fit] = jMR(y, W, E)
 import au.edu.adelaide.fxmr.model.mr.MRSolverAJOptimiser;
 import au.edu.adelaide.fxmr.model.mr.MRProblemMaker;
@@ -12,6 +12,9 @@ if nargin==1
     E={};
 elseif nargin==2
     E={};
+elseif nargin==4
+    %Do not use tol < 1e-11
+    solver.setTolerance(mrTol, mrTol * 1000);
 end
 
 p.setWeightArray(W);
@@ -21,7 +24,7 @@ p.setWeightArray(W);
 % need some work in the future - the 3d matrix isn't used explicitly
 if iscell(E)
     %This could be improved...
-    adj = cell2adj(1:nvar, E);
+    adj = cell2adj2(1:nvar, E);
 else
     adj = E;
 end

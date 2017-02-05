@@ -1,22 +1,22 @@
-function [p, datafit, fits, maxbad, times] = jCMRfitsx(nsample,y, model, E, shrink, proc, cheapP, mrTol)
-% function [xStar, fStar, nitr] = jCMR(y, E)
-% CMR that calls Java for calculations
-%
+function [p, datafit, fits, maxbad, times] = jMRfits(nsample, y, E, shrink, proc, mrTol)
+% function [p, datafit, fits, maxbad, times] = jMRfits(nsample, y, E, shrink, proc)
+% jMRfits that calls the same java code as jCMRfits but with a parameter to
+% use the non-coupled code (model is ignored and never set).
+
 import au.edu.adelaide.fxmr.model.*;
 
-if nargin<4
+if nargin<3
     E={};
 end
-if nargin<5
+if nargin<4
     shrink = -1;
 end
-if nargin < 6
+if nargin<5
     proc=0;
 end
-if nargin < 7
+if nargin<6
     mrTol=0;
 end
-
 if iscell(y)
     if isstruct(y{1})
         problem = CMRxFitsProblemMaker();
@@ -35,11 +35,6 @@ else
     nvar = numel(unique(y(:,3)));
     ncond = ngroup * (size(y,2) - 3);
 end
-
-if nargin<3
-    model=ones(ncond,1);
-end
-
 
 % convert E to simpleConstraint objects
 if iscell(E)
@@ -75,7 +70,6 @@ else
     end
 end
 
-problem.setModel(model);
 
 if iscell(y)
     if isstruct(y{1})
@@ -96,18 +90,18 @@ if iscell(y)
         end
         problem.setN(ns);
         
-        sol = CMRxFits(nsample,problem.getProblem(),shrink,proc,cheapP,mrTol,mrTol*1000);
+        sol = CMRxFits(nsample,problem.getProblem(),shrink,proc,false,true,mrTol,mrTol*1000);
     else
         for group=1:ngroup
             for var=1:nvar
                 problem.addCell(group,var,y{group,var})
             end
         end
-        sol = problem.solve(nsample,proc,cheapP,mrTol,mrTol*1000);
+        sol = problem.solve(nsample,proc,false,true,mrTol,mrTol*1000);
     end
 else
     problem.setGM(y);
-    sol = problem.solve(nsample,proc,cheapP,mrTol,mrTol*1000);
+    sol = problem.solve(nsample,proc,false,true,mrTol,mrTol*1000);
 end
 
 p = sol.getP();

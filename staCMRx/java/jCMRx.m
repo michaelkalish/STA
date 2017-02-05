@@ -1,4 +1,4 @@
-function [xStar, fStar, nitr, adjStar, fl, fu, fuf, remaining] = jCMRx(y, model, E, proc, tolerance)
+function [xStar, fStar, nitr, adjStar, fl, fu, fuf, remaining, mrFailures] = jCMRx(y, model, E, proc, tolerance, mrTol)
 % function [xStar, fStar, nitr, adjStar, fl, fu, fuf, remaining] = jCMRx(y, model, E, proc, tolerance)
 % CMR that calls Java for calculations
 import au.edu.adelaide.fxmr.model.*;
@@ -14,7 +14,10 @@ solver.setAllowCyclic(false);
 % the value specified (100000 is a good setting?? Tests are required)
 solver.setGrabEnd(100000);
 
-
+if nargin > 5
+    solver.setMrTolerance1(mrTol);
+    solver.setMrTolerance2(mrTol * 1000);
+end
 if nargin < 5, tolerance=0; end
 if nargin < 4, proc=-1; end
 if nargin < 3, E = {}; end
