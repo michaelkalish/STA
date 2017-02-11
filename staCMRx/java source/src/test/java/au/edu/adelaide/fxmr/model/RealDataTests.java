@@ -68,7 +68,7 @@ public class RealDataTests {
 		CMRxProblem problem = new CMRxProblem(getMeansSK1(), getWeightsSK1(), null, model6);
 		// System.out.println(problem.toMatlab());
 		ParCMRxSolver solver = new ParCMRxSolver();
-		CMRSolution sol = solver.solve(problem, true);
+		CMRSolution sol = solver.solve(problem, false);
 		assertEquals(102.03152394, sol.getFStar(), 1e-5);
 	}
 

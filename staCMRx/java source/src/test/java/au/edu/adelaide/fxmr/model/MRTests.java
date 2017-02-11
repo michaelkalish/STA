@@ -164,10 +164,10 @@ public class MRTests {
 				92.2218631244646, 80.53179366777084, 54.89136683289008 };
 
 		HashSet<SimpleLinearConstraint> cons = new HashSet<>();
-		cons.add(new SimpleLinearConstraint(means.length, 11, 8));
-		cons.add(new SimpleLinearConstraint(means.length, 0, 5));
-		cons.add(new SimpleLinearConstraint(means.length, 7, 2));
-		cons.add(new SimpleLinearConstraint(means.length, 1, 8));
+		cons.add(new SimpleLinearConstraint(11, 8));
+		cons.add(new SimpleLinearConstraint(0, 5));
+		cons.add(new SimpleLinearConstraint(7, 2));
+		cons.add(new SimpleLinearConstraint(1, 8));
 
 		MRProblem p = new MRProblem(means, new DenseDoubleMatrix2D(weights), cons);
 		// System.out.println(p.toMatlabString());
@@ -262,15 +262,15 @@ public class MRTests {
 		// x9 - x11, x7 - x8, x10 - x11]
 
 		HashSet<SimpleLinearConstraint> matA = new HashSet<>();
-		matA.add(new SimpleLinearConstraint(n, 11, 7));
-		matA.add(new SimpleLinearConstraint(n, 6, 15));
-		matA.add(new SimpleLinearConstraint(n, 7, 14));
-		matA.add(new SimpleLinearConstraint(n, 4, 10));
-		matA.add(new SimpleLinearConstraint(n, 7, 10));
-		matA.add(new SimpleLinearConstraint(n, 8, 11));
-		matA.add(new SimpleLinearConstraint(n, 9, 11));
-		matA.add(new SimpleLinearConstraint(n, 7, 8));
-		matA.add(new SimpleLinearConstraint(n, 10, 11));
+		matA.add(new SimpleLinearConstraint(11, 7));
+		matA.add(new SimpleLinearConstraint(6, 15));
+		matA.add(new SimpleLinearConstraint(7, 14));
+		matA.add(new SimpleLinearConstraint(4, 10));
+		matA.add(new SimpleLinearConstraint(7, 10));
+		matA.add(new SimpleLinearConstraint(8, 11));
+		matA.add(new SimpleLinearConstraint(9, 11));
+		matA.add(new SimpleLinearConstraint(7, 8));
+		matA.add(new SimpleLinearConstraint(10, 11));
 
 		DoubleMatrix2D weights = new DenseDoubleMatrix2D(n, n);
 		for (int i = 0; i < n; i++)
@@ -304,11 +304,11 @@ public class MRTests {
 		// x9 - x11, x7 - x8, x10 - x11]
 
 		HashSet<SimpleLinearConstraint> matA = new HashSet<>();
-		matA.add(new SimpleLinearConstraint(n, 0, 1));
-		matA.add(new SimpleLinearConstraint(n, 1, 2));
-		matA.add(new SimpleLinearConstraint(n, 2, 0));
-		matA.add(new SimpleLinearConstraint(n, 1, 5));
-		matA.add(new SimpleLinearConstraint(n, 5, 0));
+		matA.add(new SimpleLinearConstraint(0, 1));
+		matA.add(new SimpleLinearConstraint(1, 2));
+		matA.add(new SimpleLinearConstraint(2, 0));
+		matA.add(new SimpleLinearConstraint(1, 5));
+		matA.add(new SimpleLinearConstraint(5, 0));
 
 		DoubleMatrix2D weights = new DenseDoubleMatrix2D(n, n);
 		for (int i = 0; i < n; i++)
@@ -356,10 +356,10 @@ public class MRTests {
 		int nMaxC = 14;
 		for (int i = 0; i < nMaxC; i++)
 			for (int j = i + 1; j < nMaxC; j++)
-				matA.add(new SimpleLinearConstraint(n, j, i));
+				matA.add(new SimpleLinearConstraint(j, i));
 
-		matA.add(new SimpleLinearConstraint(n, 0, nMaxC - 1));
-		matA.add(new SimpleLinearConstraint(n, nMaxC, nMaxC - 1));
+		matA.add(new SimpleLinearConstraint(0, nMaxC - 1));
+		matA.add(new SimpleLinearConstraint(nMaxC, nMaxC - 1));
 
 		DoubleMatrix2D weights = new DenseDoubleMatrix2D(n, n);
 		for (int i = 0; i < n; i++)
@@ -394,17 +394,17 @@ public class MRTests {
 		// x9 - x11, x7 - x8, x10 - x11]
 
 		HashSet<SimpleLinearConstraint> matA = new HashSet<>();
-		matA.add(new SimpleLinearConstraint(n, 0, 1));
-		matA.add(new SimpleLinearConstraint(n, 1, 2));
-		matA.add(new SimpleLinearConstraint(n, 2, 0));
+		matA.add(new SimpleLinearConstraint(0, 1));
+		matA.add(new SimpleLinearConstraint(1, 2));
+		matA.add(new SimpleLinearConstraint(2, 0));
 
-		matA.add(new SimpleLinearConstraint(n, 1, 5));
-		matA.add(new SimpleLinearConstraint(n, 5, 0));
+		matA.add(new SimpleLinearConstraint(1, 5));
+		matA.add(new SimpleLinearConstraint(5, 0));
 
-		matA.add(new SimpleLinearConstraint(n, 1, 9));
-		matA.add(new SimpleLinearConstraint(n, 9, 5));
+		matA.add(new SimpleLinearConstraint(1, 9));
+		matA.add(new SimpleLinearConstraint(9, 5));
 
-		matA.add(new SimpleLinearConstraint(n, 15, 14));
+		matA.add(new SimpleLinearConstraint(15, 14));
 
 		DoubleMatrix2D weights = new DenseDoubleMatrix2D(n, n);
 		for (int i = 0; i < n; i++)

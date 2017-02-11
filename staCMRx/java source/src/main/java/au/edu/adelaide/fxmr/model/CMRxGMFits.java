@@ -235,7 +235,7 @@ public class CMRxGMFits implements Fits {
 
 			times[index] = (System.nanoTime() - start) / 1000000000.0;
 
-			System.out.println(times[index]);
+			//System.out.println(times[index]);
 
 			badnesses[index] = worst;
 

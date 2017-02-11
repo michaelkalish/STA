@@ -58,7 +58,7 @@ public class CMRxProblemMaker {
 			// assume square!
 			for (int j = 0; j < adj.length; j++)
 				if (adj[i][j] > 0)
-					curMat.add(new SimpleLinearConstraint(adj.length, i, j));
+					curMat.add(new SimpleLinearConstraint(i, j));
 
 		matAs.add(curMat);
 	}
@@ -91,7 +91,7 @@ public class CMRxProblemMaker {
 			int rlm1 = rl - 1;
 			for (int i = 0; i < rlm1; i++)
 				// Take away 1 to convert from matlab 1-index to java 0-index
-				curMat.add(new SimpleLinearConstraint(nCond, e[i] - 1, e[i + 1] - 1));
+				curMat.add(new SimpleLinearConstraint(e[i] - 1, e[i + 1] - 1));
 		}
 	}
 

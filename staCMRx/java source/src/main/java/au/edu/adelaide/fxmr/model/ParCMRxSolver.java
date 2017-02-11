@@ -93,8 +93,7 @@ public class ParCMRxSolver {
 		int[] infeas = CMRxSolver.isFeasible3n(problem.getMeans(), infeasZones, tmpVolumes, tmpZoneNumbers);
 
 		if (infeas == null)
-			return problem.createSolution(0, problem.getMeans(), iter,
-					(double) (System.nanoTime() - start) / 1_000_000_000, adjBar, 0, 0);
+			return problem.createSolution(0, problem.getMeans(), iter, (double) (System.nanoTime() - start) / 1_000_000_000, adjBar, 0, 0);
 
 		remaining = new TreeSet<CMRxTrial>();
 		visited = new VisitedSet();
@@ -147,8 +146,7 @@ public class ParCMRxSolver {
 		// Add one last item to iter to make it pretty
 		iter.add(new CMRIter(fBar, fBar, fBar, remaining.size()));
 
-		return problem.createSolution(fBar, xBar, iter, (double) (System.nanoTime() - start) / 1_000_000_000, adjBar,
-				mrSolver.getCalls(), fBarReductions);
+		return problem.createSolution(fBar, xBar, iter, (double) (System.nanoTime() - start) / 1_000_000_000, adjBar, mrSolver.getCalls(), fBarReductions);
 	}
 
 	public double getTolerance() {
@@ -219,7 +217,7 @@ public class ParCMRxSolver {
 								upperFloor = remaining.last().getF();
 							else
 								upperFloor = fFloor;// This is the one we just
-													// grabbed!
+							// grabbed!
 						}
 						iter.add(new CMRIter(fFloor, fBar, upperFloor, remaining.size()));
 					}
@@ -244,8 +242,8 @@ public class ParCMRxSolver {
 
 							if (infeas == null) {
 								// Solution is feasible
-								if (fit < fBar) {
-									synchronized (ParCMRxSolver.this) {
+								synchronized (ParCMRxSolver.this) {
+									if (fit < fBar) {
 										// Solution is better than current best
 										fBar = fit;
 										xBar = xPrimes;
@@ -316,8 +314,7 @@ public class ParCMRxSolver {
 					if (sl != null && System.currentTimeMillis() > nextUpdate.get()) {
 						nextUpdate.set(System.currentTimeMillis() + updateFreq);
 
-						running = sl.updateStatus(fFloor, fBar, upperFloor, remaining.size(), nIterThread, collisions, fBarReductions,
-								cyclesAvoided);
+						running = sl.updateStatus(fFloor, fBar, upperFloor, remaining.size(), nIterThread, collisions, fBarReductions, cyclesAvoided);
 					}
 				}
 			} catch (Exception e) {

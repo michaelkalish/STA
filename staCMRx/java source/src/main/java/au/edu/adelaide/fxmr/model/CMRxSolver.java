@@ -17,7 +17,6 @@ import gnu.trove.map.hash.TIntObjectHashMap;
 import gnu.trove.set.hash.TIntHashSet;
 
 public class CMRxSolver {
-	private static final double ZERO_TOL = 1e-5;
 	/**
 	 * If a call to MR fails, abort!
 	 */
@@ -241,7 +240,7 @@ public class CMRxSolver {
 			for (int row = ny; --row >= 0;)
 				for (int column = ny; --column >= row;) {
 					double diff = curY[row] - curY[column];
-					if (Math.abs(diff) > ZERO_TOL) {
+					if (Math.abs(diff) > CMRSolver.ZERO_TOL) {
 						volumes.setQuick(row, column, volumes.getQuick(row, column) * diff);
 						zoneNumbers[row][column] += (int) (Math.signum(diff)) * curPow;
 					}

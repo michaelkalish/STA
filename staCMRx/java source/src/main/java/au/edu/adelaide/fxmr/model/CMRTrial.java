@@ -67,7 +67,7 @@ public class CMRTrial implements Comparable<CMRTrial> {
 
 		for (int i = 0; i < nvar; i++) {
 			newTrial.problems[i] = (MRProblem) problems[i].clone();
-			newTrial.problems[i].addConstraint(negIndex, posIndex);
+			newTrial.problems[i].addConstraint(negIndex, posIndex, solutions[i] == null ? null : solutions[i].getxVector());
 			// Check feasability of old solution
 			double[] curXVector = solutions[i].getxVector();
 			if (curXVector[negIndex] < curXVector[posIndex])

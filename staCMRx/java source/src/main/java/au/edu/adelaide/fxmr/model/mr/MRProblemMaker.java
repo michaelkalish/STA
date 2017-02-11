@@ -20,13 +20,13 @@ public class MRProblemMaker {
 
 	public void addConstraint(int pos, int neg) {
 		// Note: -1s are because java is zero indexed, MATLAB/R isnt
-		curMat.add(new SimpleLinearConstraint(y.length, pos - 1, neg - 1));
+		curMat.add(new SimpleLinearConstraint(pos - 1, neg - 1));
 	}
 
 	public void addConstraints(int[] constraints) {
 		// Note: -1s are because java is zero indexed, MATLAB/R isnt
 		for (int i = 1; i < constraints.length; i++) {
-			curMat.add(new SimpleLinearConstraint(y.length, constraints[i - 1] - 1, constraints[i] - 1));
+			curMat.add(new SimpleLinearConstraint(constraints[i - 1] - 1, constraints[i] - 1));
 		}
 	}
 

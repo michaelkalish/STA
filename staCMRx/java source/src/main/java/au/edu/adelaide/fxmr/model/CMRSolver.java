@@ -12,7 +12,10 @@ import cern.colt.matrix.impl.DenseDoubleMatrix2D;
 import gnu.trove.set.hash.TIntHashSet;
 
 public class CMRSolver {
-	private static final double ZERO_TOL = 1e-6;
+	/**
+	 * When deciding if two solution variables are the same, use this tolerance.
+	 */
+	public static final double ZERO_TOL = 1e-6;
 
 	private CMRListener listener;
 
@@ -89,17 +92,17 @@ public class CMRSolver {
 				if (fit < fBar)
 					// Solution is better than current best
 					if (feas == null) {
-					// Solution is feasible
-					fBar = fit;
-					fBarReductions++;
-					xBar = xPrimes;
-					adjBar = current.getAdjs();
+						// Solution is feasible
+						fBar = fit;
+						fBarReductions++;
+						xBar = xPrimes;
+						adjBar = current.getAdjs();
 					} else {
-					// Solution not feasible - make it so!
-					int negIndex = feas[0];
-					int posIndex = feas[1];
-					remaining.add(current.split(posIndex, negIndex, 0));
-					remaining.add(current.split(negIndex, posIndex, 1));
+						// Solution not feasible - make it so!
+						int negIndex = feas[0];
+						int posIndex = feas[1];
+						remaining.add(current.split(posIndex, negIndex, 0));
+						remaining.add(current.split(negIndex, posIndex, 1));
 					}
 			}
 		}
@@ -109,19 +112,18 @@ public class CMRSolver {
 			listener.step(xBar, fBar);
 		}
 
-		return new CMRSolution(fBar, xBar, iter, (double) (System.nanoTime() - start) / 1_000_000_000, adjBar,
-				mrSolver.getCalls(), fBarReductions);
+		return new CMRSolution(fBar, xBar, iter, (double) (System.nanoTime() - start) / 1_000_000_000, adjBar, mrSolver.getCalls(), fBarReductions);
 	}
 
 	/**
-	 * modified version of isFeasible3n - given arbitrary ordered y vectors,
-	 * will determine the largest non coupled monotonic pair.
+	 * isFeasible3n - given arbitrary ordered y vectors, will
+	 * determine the largest non coupled monotonic pair.
 	 * 
 	 * @param y
-	 *            2d array of means from StatsSTA
+	 *           2d array of means from StatsSTA
 	 * @param infeas
-	 *            zone numbers corresponding to infeasible points. For example,
-	 *            [+1 -1] corresponds to zone number 2
+	 *           zone numbers corresponding to infeasible points. For example,
+	 *           [+1 -1] corresponds to zone number 2
 	 * @return null if feasible or the largest inversion if not (ZERO INDEXED!)
 	 */
 	int[] isFeasible4(double[][] y, TIntHashSet infeas) {

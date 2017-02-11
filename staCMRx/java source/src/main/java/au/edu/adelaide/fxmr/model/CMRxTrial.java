@@ -18,8 +18,7 @@ public class CMRxTrial implements Comparable<CMRxTrial> {
 	private int solvedNum;
 	private HashableAdjSet hAdjSet;
 
-	public CMRxTrial(MRSolver solver, HashSet<SimpleLinearConstraint>[] adj, int nvar, DoubleMatrix2D[] weights,
-			double[][] means) {
+	public CMRxTrial(MRSolver solver, HashSet<SimpleLinearConstraint>[] adj, int nvar, DoubleMatrix2D[] weights, double[][] means) {
 		this.solver = solver;
 		xPrime = new double[nvar][];
 		problems = new MRProblem[nvar];
@@ -59,6 +58,8 @@ public class CMRxTrial implements Comparable<CMRxTrial> {
 				solvedNum++;
 			}
 			if (solutions[i] == null) {
+				solutions[i] = solver.solve(problems[i]);
+				
 				// Failed optimisation
 				f = Double.POSITIVE_INFINITY;
 				xPrime = null;
@@ -98,10 +99,11 @@ public class CMRxTrial implements Comparable<CMRxTrial> {
 	}
 
 	public boolean addConstraint(int index, int posIndex, int negIndex) {
+		double[] oldSolution = solutions[index] == null ? null  : solutions[index].getxVector();
 		solutions[index] = null;
 		solvedNum--;
 		problems[index] = (MRProblem) problems[index].clone();
-		boolean ret = problems[index].addConstraint(posIndex, negIndex);
+		boolean ret = problems[index].addConstraint(posIndex, negIndex, oldSolution);
 		hAdjSet = new HashableAdjSet(getAdjs());
 		return ret;
 	}

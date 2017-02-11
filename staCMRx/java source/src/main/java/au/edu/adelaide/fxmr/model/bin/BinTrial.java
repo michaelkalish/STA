@@ -132,7 +132,7 @@ public class BinTrial implements Comparable<BinTrial> {
 
 		for (int i = 0; i < nvar; i++) {
 			newTrial.problems[i] = (MRProblem) problems[i].clone();
-			newTrial.problems[i].addConstraint(negIndex, posIndex);
+			newTrial.problems[i].addConstraint(negIndex, posIndex, null);
 			// Check feasability of old solution
 			double[] curXVector = solutions[i].getxVector();
 			if (curXVector[negIndex] < curXVector[posIndex])

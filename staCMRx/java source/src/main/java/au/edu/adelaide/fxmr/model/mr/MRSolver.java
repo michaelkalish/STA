@@ -1,8 +1,10 @@
 package au.edu.adelaide.fxmr.model.mr;
 
+import au.edu.adelaide.fxmr.model.CMRSolver;
+
 public abstract class MRSolver {
 	public static final double TOL1 = 1e-10;
-	public static final double TOL2 = 1e-7;
+	public static final double TOL2 = CMRSolver.ZERO_TOL;
 
 	protected double tolInitFeas = TOL1;
 	protected double tolInit = TOL1 * 10;
