@@ -12,8 +12,6 @@ import cern.colt.matrix.DoubleMatrix2D;
 import cern.colt.matrix.impl.SparseDoubleMatrix2D;
 import cern.colt.matrix.linalg.Algebra;
 import cern.jet.math.Functions;
-import gnu.trove.queue.TIntQueue;
-import gnu.trove.stack.array.TIntArrayStack;
 
 /**
  * Defines the input for the MR problem
