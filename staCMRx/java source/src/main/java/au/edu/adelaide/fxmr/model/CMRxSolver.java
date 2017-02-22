@@ -25,6 +25,7 @@ public class CMRxSolver {
 	private double tolerance = 0;
 	protected double mrTolerance1 = 0;
 	protected double mrTolerance2 = 0;
+	private boolean onlyFeas = false;
 
 	public CMRxSolver() {
 	}
@@ -73,19 +74,12 @@ public class CMRxSolver {
 			return problem.createSolution(0, problem.getMeans(), iter,
 					(double) (System.nanoTime() - start) / 1_000_000_000, null, 0, 0);
 
-		TreeSet<CMRxTrial> remaining = new TreeSet<>();
-
 		MRSolverAJOptimiser mrSolver = new MRSolverAJOptimiser();
 		mrSolver.setTolerance(mrTolerance1, mrTolerance2);
 
-		// mrSolver.setFailQuietly(easyFail);
-		mrSolver.setAllowCyclicProblems(allowCyclic);
-
-		// Add first CMRxTrial
-		remaining.add(new CMRxTrial(mrSolver, problem.getAdj(), nvar, weights, means));
-
 		if (sl != null)
-			sl.updateStatus("Running CMRx");
+			sl.updateStatus("CMRx getting upper bound");
+		
 		// Get a reasonable upper bound
 		CMRxTrial bestGreedy = getFeasible6(problem, mrSolver, zDecodeCache);
 		if (bestGreedy != null) {
@@ -96,7 +90,7 @@ public class CMRxSolver {
 			bestGreedy = null;
 			fBarReductions++;
 
-			if (targetSet && fBar < finalTarget) {
+			if (onlyFeas || targetSet && fBar < finalTarget) {
 				// upper bound is less than target!
 				// System.out.println(fFloor + ", " + fBar + " <= " + target);
 				return new CMRSolution(fBar + problem.getfAddWeightedMeans(), null, null,
@@ -104,6 +98,17 @@ public class CMRxSolver {
 						mrSolver.getCalls(), fBarReductions);
 			}
 		}
+
+		if (sl != null)
+			sl.updateStatus("Running CMRx");
+
+		TreeSet<CMRxTrial> remaining = new TreeSet<>();
+
+		// mrSolver.setFailQuietly(easyFail);
+		mrSolver.setAllowCyclicProblems(allowCyclic);
+
+		// Add first CMRxTrial
+		remaining.add(new CMRxTrial(mrSolver, problem.getAdj(), nvar, weights, means));
 
 		double tolerancem1 = 1.0 - tolerance;
 
@@ -430,5 +435,13 @@ public class CMRxSolver {
 
 	public void setMrTolerance2(double mrTolerance2) {
 		this.mrTolerance2 = mrTolerance2;
+	}
+
+	public boolean isOnlyFeas() {
+		return onlyFeas;
+	}
+
+	public void setOnlyFeas(boolean onlyFeas) {
+		this.onlyFeas = onlyFeas;
 	}
 }
