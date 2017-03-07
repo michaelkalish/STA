@@ -26,8 +26,6 @@ function output = staSTATS (data, shrink, warning)
 % output{ivar}.lm = ncond x ncond matrix of loftus-masson within-subject variance
 % output{ivar}.shrink = shrinkage factor (between 0 and 1)
 % if shrink==1 then diagonalise weight matrix, if shrink==0 then do nothing
-% output{ivar}.nanflag = count of nans encountered in each condition (treated as missing) 
-% output{ivar}.bad = a flag indicating if a covariance matrix has been diagonalized because of ill-conditioning (for noting only)
 %
 % *************************************************************************
 % last modified 13 October 2016 (to treat nans as missing)
@@ -61,20 +59,24 @@ for ivar = 1:nvar
 %        u = sum(isnan(yy),2); yy=yy(u==0,:); % delete nans
         out.nanflag = sum(sum(isnan(yy))); % check for nans
         out.means = mean(yy,1,'omitnan'); % means excluding nans
+        out.means(isnan(out.means)) = 0; % Means can not be NAN (means whole column is NAN & bad will be 2 later)
         a=yy;a(isnan(yy))=0;a(~isnan(yy))=1; out.n=a'*a; % number of observations
         out.cov = cov(yy,1,'partialrows'); out.cov(isnan(out.cov))=0;  % covariance
-        if cond(out.cov) < 1e6,
+        eigCov = eig(out.cov);
+        if cond(out.cov) < 1e6 && min(eigCov) > 0
             [out.regcov, out.shrinkage] = shrinkDiag(yy, shrink); % shrink if required
             out.bad = 0;
         else
             [out.regcov, out.shrinkage] = shrinkDiag(yy, 1); % diagonalise bad covariance matrix
             out.bad = 1;
         end
-        if cond(out.regcov) > 1e6
+        eigRegCov = eig(out.regcov);
+        if cond(out.regcov) > 1e6 || min(eigRegCov) <= 0
             out.regcov = trace(out.regcov)*eye(size(out.regcov,1))/size(out.regcov,1); % make sure all diagonal elements are nonzero
             out.bad = 2;
         end
-        out.weights = out.n.*out.regcov^-1; % weights
+        outNmin1 = max(out.n,eye(size(out.regcov,1)));
+        out.weights =outNmin1.*out.regcov^-1; % weights
         out.lm = loftusmasson(yy); % loftusmasson within subjects variance
 % add to output
         output{ivar}.means = [output{ivar}.means, out.means];
@@ -87,7 +89,7 @@ for ivar = 1:nvar
         output{ivar}.nanflag = [output{ivar}.nanflag, out.nanflag];
         output{ivar}.bad = [output{ivar}.bad, out.bad];
     end
-    if sum(output{ivar}.nanflag) > 0 & warning ~= 0
+    if sum(output{ivar}.nanflag) > 0 && warning ~= 0
         fprintf ('Warning: %d NANs detected for variable %d', sum(output{ivar}.nanflag), ivar);
         fprintf ('. These are treated as missing.\n');
     end

@@ -72,6 +72,8 @@ else
     ys = staSTATS (celldata, shrink);
 end
 
+nvar = numel(ys);
+
 if isempty(groups)
     groups = {1:numel(ys{vars(1)}.means)};
 end
@@ -84,7 +86,7 @@ if isempty(labels)
 end
 
 if isempty(axislabels)
-    axislabels = cell(1,2);
+    axislabels = cell(1,nvar);
     for i=1:numel(axislabels)
         axislabels{i} = ['Outcome Variable ' num2str(i)];
     end
