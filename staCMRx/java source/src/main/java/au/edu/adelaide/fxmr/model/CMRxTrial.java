@@ -44,6 +44,35 @@ public class CMRxTrial implements Comparable<CMRxTrial> {
 		return compareF;
 	}
 
+	/**
+	 * Same as run but utilise the trialCache
+	 * 
+	 * @param trialCache
+	 */
+	public void run(TrialCache trialCache) {
+		if (xPrime == null)
+			// We failed previously, give up!
+			return;
+
+		int n = problems.length;
+
+		f = 0;
+		for (int i = 0; i < n; i++) {
+			if (solutions[i] == null) {
+				solutions[i] = trialCache.solve(i, solver, problems[i]);
+				solvedNum++;
+			}
+			if (solutions[i] == null) {
+				// Failed optimisation
+				f = Double.POSITIVE_INFINITY;
+				xPrime = null;
+				return;
+			}
+			f += solutions[i].getfVal();
+			xPrime[i] = solutions[i].getxVector();
+		}
+	}
+
 	public void run() {
 		if (xPrime == null)
 			// We failed previously, give up!
@@ -58,8 +87,6 @@ public class CMRxTrial implements Comparable<CMRxTrial> {
 				solvedNum++;
 			}
 			if (solutions[i] == null) {
-				solutions[i] = solver.solve(problems[i]);
-				
 				// Failed optimisation
 				f = Double.POSITIVE_INFINITY;
 				xPrime = null;
@@ -99,7 +126,7 @@ public class CMRxTrial implements Comparable<CMRxTrial> {
 	}
 
 	public boolean addConstraint(int index, int posIndex, int negIndex) {
-		double[] oldSolution = solutions[index] == null ? null  : solutions[index].getxVector();
+		double[] oldSolution = solutions[index] == null ? null : solutions[index].getxVector();
 		solutions[index] = null;
 		solvedNum--;
 		problems[index] = (MRProblem) problems[index].clone();

@@ -286,15 +286,15 @@ public class CMRxProblem {
 		for (int i = 0; i < nVar; i++) {
 			sb.append("struct(");
 			sb.append("'means',");
-			sb.append(Arrays.toString(means[i]));
+			sb.append(Arrays.toString(meansOriginal[i]));
 			sb.append(",'weights',[");
-			for (int row = 0; row < weights[i].rows(); row++) {
-				sb.append(weights[i].get(row, 0));
-				for (int col = 1; col < weights[i].columns(); col++) {
+			for (int row = 0; row < weightsOriginal[i].rows(); row++) {
+				sb.append(weightsOriginal[i].get(row, 0));
+				for (int col = 1; col < weightsOriginal[i].columns(); col++) {
 					sb.append(',');
-					sb.append(weights[i].get(row, col));
+					sb.append(weightsOriginal[i].get(row, col));
 				}
-				if (row != weights[i].rows() - 1)
+				if (row != weightsOriginal[i].rows() - 1)
 					sb.append(';');
 			}
 			sb.append("]) ");
@@ -311,6 +311,21 @@ public class CMRxProblem {
 			}
 		}
 		sb.append("};");
+
+		if (modelOriginal != null) {
+			sb.append("\nm=");
+			sb.append("[");
+			for (int r = 0; r < modelOriginal.rows(); r++) {
+				sb.append("[");
+				for (int c = 0; c < modelOriginal.columns(); c++) {
+					sb.append(modelOriginal.get(r, c));
+					sb.append(",");
+				}
+				sb.append("];");
+			}
+			sb.append("];");
+		}
+
 		return sb.toString();
 	}
 

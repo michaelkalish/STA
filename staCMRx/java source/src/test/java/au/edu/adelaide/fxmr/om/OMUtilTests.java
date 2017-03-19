@@ -139,6 +139,10 @@ public class OMUtilTests {
 		for (int i = 0; i < exp.length; i++)
 			assertArrayEquals(exp[i], actual[i]);
 
+		// actual = OMUtil.signClosure2(OMUtil.covectors(a));
+		// for (int i = 0; i < exp.length; i++)
+		// assertArrayEquals(exp[i], actual[i]);
+
 		int[][] exp2 = { { 0, 0, 0, 1 }, { 0, 0, 1, -1 }, { 0, 0, 1, 0 }, { 0, 1, -1, 0 }, { 0, 1, -1, 1 },
 				{ 0, 1, 0, -1 }, { 0, 1, 0, 0 }, { 0, 1, 0, 1 }, { 0, 1, 1, -1 }, { 0, 1, 1, 0 }, { 1, -1, -1, 0 },
 				{ 1, -1, -1, 1 }, { 1, -1, 0, 0 }, { 1, -1, 0, 1 }, { 1, 0, -1, 0 }, { 1, 0, -1, 1 }, { 1, 0, 0, 0 },
@@ -146,6 +150,10 @@ public class OMUtilTests {
 		int[][] actual2 = OMUtil.signClosure(OMUtil.covectors(OMUtil.checkRank(e)));
 		for (int i = 0; i < exp2.length; i++)
 			assertArrayEquals(exp2[i], actual2[i]);
+
+		// actual2 = OMUtil.signClosure2(OMUtil.covectors(OMUtil.checkRank(e)));
+		// for (int i = 0; i < exp2.length; i++)
+		// assertArrayEquals(exp2[i], actual2[i]);
 	}
 
 	@Test

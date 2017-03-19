@@ -12,19 +12,9 @@ public class MRSolution {
 	private double[] xVector;
 	private double timeS;
 	private MRProblem problem;
-
-	public MRProblem getProblem() {
-		return problem;
-	}
-
 	private int iterations;
 
-	public int getIterations() {
-		return iterations;
-	}
-
 	public MRSolution(MRProblem problem, double[] xVector, double timeS, int iterations) {
-		super();
 		this.problem = problem;
 		this.xVector = xVector;
 		this.timeS = timeS;
@@ -36,6 +26,19 @@ public class MRSolution {
 
 		DoubleMatrix1D lhs = problem.getWeights().zMult(diff, new DenseDoubleMatrix1D(problem.getN()));
 		fVal = lhs.zDotProduct(diff);
+	}
+
+	/**
+	 * Called when we're looking at the difference between two MRSolutions
+	 * 
+	 * xVector will be from solBase!
+	 */
+	public MRSolution(MRSolution solBase, MRSolution solInverted) {
+		this.fVal = solInverted.fVal - solBase.fVal;
+		this.iterations = solBase.iterations + solInverted.iterations;
+		this.timeS = solBase.timeS + solInverted.timeS;
+		this.problem = solBase.problem;
+		this.xVector = solBase.xVector;
 	}
 
 	public double getTimeS() {
@@ -63,7 +66,18 @@ public class MRSolution {
 		double[] y = problem.getY();
 
 		for (int i = 0; i < problem.getN(); i++) {
-			sb.append(i + "\t" + FMT.format(y[i]) + "\t" + FMT.format(xVector[i]) + "\n");
+			sb.append(i + "\t" + FMT.format(y[i]));
+			if (xVector != null)
+				sb.append("\t" + FMT.format(xVector[i]));
+			sb.append("\n");
 		}
+	}
+
+	public int getIterations() {
+		return iterations;
+	}
+
+	public MRProblem getProblem() {
+		return problem;
 	}
 }

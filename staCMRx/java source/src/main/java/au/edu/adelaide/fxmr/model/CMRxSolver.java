@@ -65,23 +65,35 @@ public class CMRxSolver {
 		int fBarReductions = 0;
 		VisitedSet visited = new VisitedSet();
 
+		if (sl != null)
+			sl.updateStatus("CMRx checking feasability");
+
 		TIntHashSet infeasZones = problem.getInfeasZones();
 		int[] infeas = isFeasible3n(problem.getMeans(), infeasZones, tmpVolumes, tmpZoneNumbers);
 		HashSet<SimpleLinearConstraint>[] adjBar = null;
 		int cyclicAvoided = 0;
 
-		if (infeas == null)
+		if (infeas == null) {
+			if (sl != null)
+				sl.setFinished();
 			return problem.createSolution(0, problem.getMeans(), iter,
 					(double) (System.nanoTime() - start) / 1_000_000_000, null, 0, 0);
+		}
 
 		MRSolverAJOptimiser mrSolver = new MRSolverAJOptimiser();
 		mrSolver.setTolerance(mrTolerance1, mrTolerance2);
 
 		if (sl != null)
 			sl.updateStatus("CMRx getting upper bound");
-		
+
 		// Get a reasonable upper bound
-		CMRxTrial bestGreedy = getFeasible6(problem, mrSolver, zDecodeCache);
+		CMRxTrial bestGreedy = getFeasibleX(problem, mrSolver, zDecodeCache);
+		// CMRxTrial bestGreedy8 = getFeasible8(problem, mrSolver,
+		// zDecodeCache);
+		// if (Math.abs(bestGreedy8.getF() - bestGreedy.getF()) > 1e-6) {
+		// System.out.println(bestGreedy8.getF() + ", " + bestGreedy.getF());
+		// }
+
 		if (bestGreedy != null) {
 			xBar = bestGreedy.getxPrime();
 			fBar = bestGreedy.getF();
@@ -93,8 +105,9 @@ public class CMRxSolver {
 			if (onlyFeas || targetSet && fBar < finalTarget) {
 				// upper bound is less than target!
 				// System.out.println(fFloor + ", " + fBar + " <= " + target);
-				return new CMRSolution(fBar + problem.getfAddWeightedMeans(), null, null,
-						(double) (System.nanoTime() - start) / 1_000_000_000, null,
+				if (sl != null)
+					sl.setFinished();
+				return problem.createSolution(fBar, xBar, null, (double) (System.nanoTime() - start) / 1_000_000_000, adjBar,
 						mrSolver.getCalls(), fBarReductions);
 			}
 		}
@@ -109,9 +122,7 @@ public class CMRxSolver {
 
 		// Add first CMRxTrial
 		remaining.add(new CMRxTrial(mrSolver, problem.getAdj(), nvar, weights, means));
-
 		double tolerancem1 = 1.0 - tolerance;
-
 		while (!remaining.isEmpty() && fFloor < fBar * tolerancem1) {
 			CMRxTrial current = remaining.pollFirst();
 			fFloor = current.getF();
@@ -125,8 +136,9 @@ public class CMRxSolver {
 
 			if (targetSet && (fBar < finalTarget || (fFloor >= finalTarget && fBar >= finalTarget))) {
 				// upper bound < target or lower bound > target
-				return new CMRSolution(fBar + problem.getfAddWeightedMeans(), null, null,
-						(double) (System.nanoTime() - start) / 1_000_000_000, null,
+				if (sl != null)
+					sl.setFinished();
+				return problem.createSolution(fBar, xBar, null, (double) (System.nanoTime() - start) / 1_000_000_000, adjBar,
 						mrSolver.getCalls(), fBarReductions);
 			}
 
@@ -137,6 +149,8 @@ public class CMRxSolver {
 				// current.run();
 				double[][] xPrimes = current.getxPrime();
 				if (xPrimes == null && easyFail) {
+					if (sl != null)
+						sl.setFinished();
 					return null;
 				} else if (xPrimes == null) {
 					if (allowCyclic) {
@@ -215,6 +229,20 @@ public class CMRxSolver {
 
 		return problem.createSolution(fBar, xBar, iter, (double) (System.nanoTime() - start) / 1_000_000_000, adjBar,
 				mrSolver.getCalls(), fBarReductions);
+	}
+
+	/**
+	 * Choose the best getFeas to use
+	 * 
+	 * @param problem
+	 * @param mrSolver
+	 * @param zDecodeCache
+	 * @return
+	 */
+	public static CMRxTrial getFeasibleX(CMRxProblem problem, MRSolverAJOptimiser solver, TIntObjectHashMap<int[]> zDecodeCache) {
+		if (problem.getCv().length > 2)
+			return getFeasible7(problem, solver, zDecodeCache);
+		return getFeasible6(problem, solver, zDecodeCache);
 	}
 
 	/**
@@ -382,7 +410,7 @@ public class CMRxSolver {
 						int k = tmpCVSet[i];
 						if (covector[k] > 0)
 							newTrial.addConstraint(k, posIndex, negIndex);
-						if (covector[k] < 0)
+						else if (covector[k] < 0)
 							newTrial.addConstraint(k, negIndex, posIndex);
 					}
 
@@ -392,14 +420,190 @@ public class CMRxSolver {
 				}
 			}
 
-			if (newBest == null)
+			if (newBest == null) {
+				// This would mean we failed very early on...
 				return null;
+			}
 
 			curBest = newBest;
 			infeas = isFeasible3n(curBest.getxPrime(), infeasZones, tmpVolumes, tmpZoneNumbers);
 		}
+
 		return curBest;
 	}
+
+	/**
+	 * Do a depth first search of a greedy feasible solution in order to obtain
+	 * a reasonable estimate of the upper bound.
+	 * 
+	 * Difference with getFeas6 is that this will cache some MR calls.
+	 * 
+	 * @param zDecodeCache
+	 * 
+	 * @return
+	 */
+	public static CMRxTrial getFeasible7(CMRxProblem problem, MRSolver solver, TIntObjectHashMap<int[]> zDecodeCache) {
+		int nvar = problem.getNVar();
+		TIntHashSet infeasZones = problem.getInfeasZones();
+		int[][] cv = problem.getCv();
+		int ncond = problem.getNCond();
+		DoubleMatrix2D tmpVolumes = new DenseDoubleMatrix2D(ncond, ncond);
+		int[][] tmpZoneNumbers = new int[ncond][ncond];
+		int[] tmpCVSet = new int[nvar];
+		int trialIndex = 0;
+
+		double[][] xPrime = problem.getMeans();
+
+		CMRxTrial curBest = new CMRxTrial(solver, problem.getAdj(), nvar, problem.getWeights(), problem.getMeans());
+
+		TrialCache trialCache = new TrialCache(nvar);
+
+		int[] infeas = isFeasible3n(xPrime, infeasZones, tmpVolumes, tmpZoneNumbers);
+		while (infeas != null) {
+			int negIndex = infeas[0];
+			int posIndex = infeas[1];
+			trialCache.clear();
+
+			int zone = infeas[2];
+			int[] signVector = zDecodeCache.get(zone);
+			if (signVector == null) {
+				signVector = OMUtil.zDecode(zone, nvar);
+				zDecodeCache.put(zone, signVector);
+			}
+
+			CMRxTrial newBest = null;
+			for (int[] covector : cv) {
+				int nS = 0;
+				for (int i = 0; i < nvar; i++)
+					if (covector[i] != signVector[i] && signVector[i] != 0)
+						tmpCVSet[nS++] = i;
+
+				if (nS > 0) {
+					CMRxTrial newTrial = curBest.split(trialIndex++);
+
+					for (int i = 0; i < nS; i++) {
+						int k = tmpCVSet[i];
+						if (covector[k] > 0) {
+							newTrial.addConstraint(k, posIndex, negIndex);
+						} else if (covector[k] < 0) {
+							newTrial.addConstraint(k, negIndex, posIndex);
+						}
+					}
+
+					newTrial.run(trialCache);
+					if (newTrial.getxPrime() != null && (newBest == null || newTrial.getF() < newBest.getF()))
+						newBest = newTrial;
+				}
+			}
+
+			if (newBest == null) {
+				// This would mean we failed very early on...
+				return null;
+			}
+
+			curBest = newBest;
+			infeas = isFeasible3n(curBest.getxPrime(), infeasZones, tmpVolumes, tmpZoneNumbers);
+		}
+
+		return curBest;
+	}
+
+	/**
+	 * generates a feasible solution by resolving each infeasible pair, one at a
+	 * time based on Oleg's new algorithm from 12 Dec 2016 this simply resolves
+	 * each infeasible pair and then does a final MR.
+	 * 
+	 * @param zDecodeCache
+	 * 
+	 * @return
+	 */
+	// public static CMRxTrial getFeasible8(CMRxProblem problem, MRSolver
+	// solver, TIntObjectHashMap<int[]> zDecodeCache) {
+	// int nvar = problem.getNVar();
+	// int ncond = problem.getNCond();
+	//
+	// TIntHashSet infeasZones = problem.getInfeasZones();
+	// int[][] cv = problem.getCv();
+	// DoubleMatrix2D tmpVolumes = new DenseDoubleMatrix2D(ncond, ncond);
+	// int[][] tmpZoneNumbers = new int[ncond][ncond];
+	// double[] diffs = new double[nvar];
+	// double[] f = new double[nvar];
+	// int nVec = cv.length;
+	// double[] fit = new double[nVec];
+	// double[][] xPrime = problem.getMeans();
+	//
+	// @SuppressWarnings("unchecked")
+	// HashSet<SimpleLinearConstraint>[] curAdj = new HashSet[nvar];
+	// for (int i = 0; i < nvar; i++)
+	// curAdj[i] = new HashSet<>(problem.getAdj()[i]);
+	//
+	// isFeasible3n(xPrime, infeasZones, tmpVolumes, tmpZoneNumbers);
+	//
+	// DoubleMatrix2D[] w = problem.getWeights();
+	//
+	// TDoubleArrayList fits = new TDoubleArrayList();
+	//
+	// int[] infeasArray = infeasZones.toArray();
+	// for (int inf : infeasArray)
+	// for (int i = 0; i < ncond; i++)
+	// for (int j = 0; j < ncond; j++)
+	// if (Math.abs(tmpZoneNumbers[i][j]) == inf) {
+	// for (int iVar = 0; iVar < nvar; iVar++) {
+	// double xi = xPrime[iVar][i];
+	// double xj = xPrime[iVar][j];
+	//
+	// diffs[iVar] = xi - xj;
+	// double wi = w[iVar].get(i, i);
+	// double wj = w[iVar].get(j, j);
+	// double sumW = wi + wj;
+	// double m = (wi * xi + wj * xj) / sumW;
+	//
+	// xi -= m;
+	// xj -= m;
+	// // cost of changing ivar
+	// f[iVar] = wi * xi * xi + wj * xj * xj;
+	// }
+	// int mincvi = -1;
+	// double minFit = Double.MAX_VALUE;
+	// for (int cvi = 0; cvi < nVec; cvi++) {
+	// double sum = 0;
+	// int[] cvI = cv[cvi];
+	// for (int iVar = 0; iVar < nvar; iVar++) {
+	// if (signum(diffs[iVar]) != cvI[iVar]) {
+	// sum += f[iVar];
+	// }
+	// }
+	//
+	// fit[cvi] = sum < 0 ? 0 : sum;
+	// if (fit[cvi] < minFit) {
+	// mincvi = cvi;
+	// minFit = fit[cvi];
+	// }
+	// }
+	//
+	// fits.add(minFit);
+	// for (int iVar = 0; iVar < nvar; iVar++) {
+	// if (cv[mincvi][iVar] <= 0) {
+	// curAdj[iVar].add(new SimpleLinearConstraint(i, j));
+	// } else if (cv[mincvi][iVar] >= 0) {
+	// curAdj[iVar].add(new SimpleLinearConstraint(j, i));
+	// }
+	// }
+	// }
+	//
+	// CMRxTrial ret = new CMRxTrial(solver, curAdj, nvar, problem.getWeights(),
+	// problem.getMeans());
+	// ret.run();
+	// return ret;
+	// }
+
+	// private static int signum(double d) {
+	// if (d == 0.0)
+	// return 0;
+	// else if (d < 0)
+	// return -1;
+	// return 1;
+	// }
 
 	public void setEasyFail(boolean easyFail) {
 		this.easyFail = easyFail;

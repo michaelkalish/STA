@@ -4,6 +4,7 @@ import au.edu.adelaide.fxmr.model.mr.MRProblem;
 import au.edu.adelaide.fxmr.model.mr.MRSolution;
 import au.edu.adelaide.fxmr.model.mr.MRSolver;
 import au.edu.adelaide.fxmr.model.mr.MRSolverAJOptimiser;
+import au.edu.adelaide.fxmr.model.mr.MRSolverReverse;
 import cern.colt.matrix.DoubleMatrix2D;
 
 /**
@@ -14,7 +15,10 @@ import cern.colt.matrix.DoubleMatrix2D;
  */
 
 public class STASolver extends CMRxSolver {
-	public STASolver() {
+	private boolean reverse;
+
+	public STASolver(boolean reverse) {
+		this.reverse = reverse;
 	}
 
 	/**
@@ -30,7 +34,7 @@ public class STASolver extends CMRxSolver {
 
 		double[][] xBar = null;
 
-		MRSolver mrSolver = new MRSolverAJOptimiser();
+		MRSolver mrSolver = reverse ? new MRSolverReverse() : new MRSolverAJOptimiser();
 		mrSolver.setTolerance(mrTolerance1, mrTolerance2);
 		// Add first CMRTrial
 

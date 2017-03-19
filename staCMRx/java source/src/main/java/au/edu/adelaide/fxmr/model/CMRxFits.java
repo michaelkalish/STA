@@ -7,7 +7,9 @@ import java.util.concurrent.TimeUnit;
 
 import au.edu.adelaide.fxmr.joptimizer.functions.SimpleLinearConstraint;
 import au.edu.adelaide.fxmr.model.mr.MRProblem;
+import au.edu.adelaide.fxmr.model.mr.MRSolver;
 import au.edu.adelaide.fxmr.model.mr.MRSolverAJOptimiser;
+import au.edu.adelaide.fxmr.model.mr.MRSolverReverse;
 import au.edu.adelaide.fxmr.model.util.MultivariateNormalDistribution;
 import cern.colt.matrix.DoubleMatrix2D;
 import cern.colt.matrix.impl.DenseDoubleMatrix2D;
@@ -25,6 +27,8 @@ public class CMRxFits implements Fits {
 	private Badness[] badnesses;
 	private boolean cheapP;
 	private HashSet<SimpleLinearConstraint>[] adj;
+	private MRSolver mrSolver;
+	private boolean onlySTAMR;
 
 	public double getDataFit() {
 		return dataFit;
@@ -50,6 +54,16 @@ public class CMRxFits implements Fits {
 		this(nSample, problem, shrink, proc, cheapP, onlySTAMR, 0, 0);
 	}
 
+	public CMRxFits(int nSample, CMRxFitsProblem problem, double shrink, int proc, boolean cheapP, boolean onlySTAMR, double mrTol1,
+			double mrTol2) {
+		this(nSample, problem, shrink, proc, cheapP, onlySTAMR, mrTol1, mrTol2, false, false);
+	}
+
+	public CMRxFits(int nSample, CMRxFitsProblem problem, double shrink, int proc, boolean cheapP, boolean onlySTAMR, double mrTol1,
+			double mrTol2, boolean approximate) {
+		this(nSample, problem, shrink, proc, cheapP, onlySTAMR, mrTol1, mrTol2, approximate, false);
+	}
+
 	/**
 	 * Do a parametric fit (original data not available)
 	 * 
@@ -58,26 +72,42 @@ public class CMRxFits implements Fits {
 	 * @param proc
 	 */
 	public CMRxFits(int nSample, CMRxFitsProblem problem, double shrink, int proc, boolean cheapP, boolean onlySTAMR, double mrTol1,
-			double mrTol2) {
+			double mrTol2, boolean approximate, boolean reverse) {
 		this.problem = problem;
 		this.shrink = shrink;
 		this.cheapP = cheapP;
 		this.adj = problem.getAdj();
+		this.onlySTAMR = onlySTAMR;
 		nVar = problem.getnVarOriginal();
+
+		dists = new MultivariateNormalDistribution[nVar];
+		for (int i = 0; i < nVar; i++) {
+			dists[i] = new MultivariateNormalDistribution(problem.getMeansOriginal()[i], problem.getCov()[i]);
+			if (!dists[i].isSymPosDef()) {
+				// This will probably be called from MATLAB so report it
+				// one-indexed.
+				System.err.println("Input covariance matrix " + (i + 1) + " is not positive definite?! (1 indexed, nvar=\" + nVar + \")");
+				return;
+			}
+		}
+
 		if (onlySTAMR)
-			solver = new STASolver();
-		else
+			solver = new STASolver(reverse);
+		else {
 			solver = new CMRxSolver();
+			solver.setOnlyFeas(approximate);
+		}
 		solver.setMrTolerance1(mrTol1);
 		solver.setMrTolerance2(mrTol2);
 
 		CMRSolution initSoln = solver.solve(problem);
+
 		dataFit = initSoln.getFStar();
 		initSoln = null;
 
 		HashSet<SimpleLinearConstraint>[] adj = problem.getAdj();
 		if (adj != null && adj.length > 0 && !onlySTAMR) {
-			MRSolverAJOptimiser mrSolver = new MRSolverAJOptimiser();
+			mrSolver = reverse ? new MRSolverReverse() : new MRSolverAJOptimiser();
 			mrSolver.setTolerance(mrTol1, mrTol2);
 			// Take away MR from dataFit
 			for (int v = 0; v < problem.getNVar(); v++) {
@@ -91,12 +121,6 @@ public class CMRxFits implements Fits {
 		fits = new double[nSample];
 		times = new double[nSample];
 		badnesses = new Badness[nSample];
-		dists = new MultivariateNormalDistribution[nVar];
-		for (int i = 0; i < nVar; i++) {
-			dists[i] = new MultivariateNormalDistribution(problem.getMeansOriginal()[i], problem.getCov()[i],
-					System.currentTimeMillis() - i * 99999);
-		}
-
 		ExecutorService pool = Executors.newFixedThreadPool(proc < 1 ? Runtime.getRuntime().availableProcessors() : proc);
 
 		for (int i = 0; i < nSample; i++)
@@ -152,7 +176,7 @@ public class CMRxFits implements Fits {
 			}
 
 			parametricBootstrap(dists, ybs);
-			// Fit to 1D model??
+			// Fit to 1D model
 			for (int i = 0; i < nVar; i++) {
 				StatsSTA sta;
 				if (shrink < 0)
@@ -169,8 +193,7 @@ public class CMRxFits implements Fits {
 
 			// bootstrap sample from 1D model data
 			for (int i = 0; i < nVar; i++) {
-				tmpDists[i] = new MultivariateNormalDistribution(tmpSolution.getXStar()[i], problem.getCov()[i],
-						System.currentTimeMillis() - i * 99999);
+				tmpDists[i] = new MultivariateNormalDistribution(tmpSolution.getXStar()[i], problem.getCov()[i]);
 			}
 			parametricBootstrap(tmpDists, ybs);
 			// calculate actual fit
@@ -189,8 +212,18 @@ public class CMRxFits implements Fits {
 			tmpSolution = solver.solve(tmpProblem, null, cheapP, dataFit);
 
 			fits[index] = tmpSolution.getFStar();
-			times[index] = (System.nanoTime() - start) / 1000000000.0;
 
+			if (adj != null && adj.length > 0 && !onlySTAMR) {
+				// Take away MR from dataFit
+				for (int v = 0; v < problem.getNVar(); v++) {
+					if (adj[v].size() > 0) {
+						MRProblem mrp = new MRProblem(tmpMeans[v], tmpWeights[v], adj[v]);
+						fits[index] -= mrSolver.solve(mrp).getfVal();
+					}
+				}
+			}
+
+			times[index] = (System.nanoTime() - start) / 1000000000.0;
 			badnesses[index] = worst;
 		}
 	}

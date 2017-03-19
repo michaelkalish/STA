@@ -83,7 +83,7 @@ public class CMRxTests {
 	}
 
 	@Test
-	public void getFeasible5Test() {
+	public void getFeasible6Test() {
 		DoubleMatrix2D w = DoubleFactory2D.dense.identity(MEANS[0].length).assign(Functions.mult(10));
 		DoubleMatrix2D[] weights = { w, w, w };
 
@@ -91,7 +91,21 @@ public class CMRxTests {
 
 		CMRxTrial greedy = CMRxSolver.getFeasible6(problem, new MRSolverAJOptimiser(), new TIntObjectHashMap<int[]>());
 		assertEquals(6.04773596513748, greedy.getF(), 1e-5);
+		
+		CMRxTrial greedy7 = CMRxSolver.getFeasible7(problem, new MRSolverAJOptimiser(), new TIntObjectHashMap<int[]>());
+		assertEquals(6.04773596513748, greedy7.getF(), 1e-5);
 	}
+
+//	@Test
+//	public void getFeasible8Test() {
+//		DoubleMatrix2D w = DoubleFactory2D.dense.identity(MEANS[0].length).assign(Functions.mult(10));
+//		DoubleMatrix2D[] weights = { w, w, w };
+//
+//		CMRxProblem problem = new CMRxProblem(MEANS, weights, null, new DenseDoubleMatrix2D(MODEL_B));
+//
+//		CMRxTrial greedy = CMRxSolver.getFeasible8(problem, new MRSolverAJOptimiser(), new TIntObjectHashMap<int[]>());
+//		assertEquals(6.97093086063586, greedy.getF(), 1e-5);
+//	}
 
 	@Test
 	public void sampleDataTest() {
@@ -107,9 +121,12 @@ public class CMRxTests {
 		CMRxProblem problem = new CMRxProblem(MEANS_C, WEIGHTS_C, null, new DenseDoubleMatrix2D(MODEL_C));
 		CMRxTrial trial = CMRxSolver.getFeasible6(problem, new MRSolverAJOptimiser(), new TIntObjectHashMap<int[]>());
 		assertEquals(9.54529898853269, trial.getF(), 1e-5);
+		
+		trial = CMRxSolver.getFeasible7(problem, new MRSolverAJOptimiser(), new TIntObjectHashMap<int[]>());
+		assertEquals(9.54529898853269, trial.getF(), 1e-5);
 	}
 
-	//@Test
+	// @Test
 	public void randomTest() {
 		for (int i = 21948; i < 1000000; i++) {
 			System.out.println(i);
@@ -172,7 +189,7 @@ public class CMRxTests {
 
 				assertEquals(sol.getFStar(), psol.getFStar(), 1e-15);
 			} catch (Exception e) {
-				//We want to know the value of i
+				// We want to know the value of i
 				break;
 			}
 		}

@@ -303,8 +303,52 @@ public class MRFitsTest {
 		problem.addAdj(nCond, index, new int[] { 7, 8, 9, 10, 11, 12 });
 		problem.dupeAdj(nvar);
 
-		Fits sol = new CMRxFits(200, problem.getProblem(), -1, 0, false, true, 0, 0);
+		Fits sol = new CMRxFits(220, problem.getProblem(), -1, 0, false, true, 0, 0);
 
+		// System.out.println(sol.getP());
+		// System.out.println(sol.getDataFit());
+		// System.out.println(Arrays.toString(sol.getFits()));
+
+		// Be careful - it's possible these may fail and that's ok (sometimes)
+		assertTrue(sol.getP() > 0.01);
+		assertTrue(sol.getP() < 0.05);
+	}
+	
+	@Test
+	public void mrFitstApproximateTest() {
+		GeneralModel gm = new GeneralModel();
+		int ngroup = 2;
+		int nvar = 6;
+
+		int s = 0;
+		for (int group = 0; group < ngroup; group++)
+			for (int var = 0; var < nvar; var++)
+				for (double[] d : data[group][var])
+					gm.addData(s++, group, var, d);
+
+		CombinedStatsSTA[] ys = gm.calcStats();
+
+		CMRxFitsProblemMaker problem = new CMRxFitsProblemMaker();
+
+		int[] ns = new int[nvar];
+		s = 0;
+		for (CombinedStatsSTA y : ys) {
+			problem.addMeanArray(y.getMeans().toArray());
+			problem.addWeightArray(y.getWeights().toArray());
+			problem.addCov(y.getCovariances().toArray());
+			ns[s++] = y.getN()[0];
+		}
+		problem.setN(ns);
+
+		int nCond = 12;
+
+		int index = problem.initAdj();
+		problem.addAdj(nCond, index, new int[] { 1, 2, 3, 4, 5, 6 });
+		problem.addAdj(nCond, index, new int[] { 7, 8, 9, 10, 11, 12 });
+		problem.dupeAdj(nvar);
+
+		Fits sol = new CMRxFits(200, problem.getProblem(), -1, 0, false, true, 0, 0);
+		
 		// System.out.println(sol.getP());
 		// System.out.println(sol.getDataFit());
 		// System.out.println(Arrays.toString(sol.getFits()));

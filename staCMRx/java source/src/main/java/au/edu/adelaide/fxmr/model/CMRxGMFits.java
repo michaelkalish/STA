@@ -12,8 +12,8 @@ import au.edu.adelaide.fxmr.joptimizer.functions.SimpleLinearConstraint;
 import au.edu.adelaide.fxmr.model.mr.MRProblem;
 import au.edu.adelaide.fxmr.model.mr.MRSolver;
 import au.edu.adelaide.fxmr.model.mr.MRSolverAJOptimiser;
+import au.edu.adelaide.fxmr.model.mr.MRSolverReverse;
 import cern.colt.matrix.DoubleMatrix2D;
-import cern.colt.matrix.impl.DenseDoubleMatrix2D;
 
 public class CMRxGMFits implements Fits {
 	private double[] fits;
@@ -35,6 +35,8 @@ public class CMRxGMFits implements Fits {
 	private FitListener listener;
 	private boolean running = true;
 	private long nextUpdate;
+	private MRSolver mrSolver;
+	private boolean onlySTAMR;
 
 	@Override
 	public double getDataFit() {
@@ -57,22 +59,36 @@ public class CMRxGMFits implements Fits {
 
 	public CMRxGMFits(int nSample, GeneralModel gm, DoubleMatrix2D model, HashSet<SimpleLinearConstraint>[] adj,
 			int proc) {
-		this(nSample, gm, 0, true, model, adj, proc, false, null, false, MRSolver.TOL1, MRSolver.TOL2);
+		this(nSample, gm, 0, true, model, adj, proc, false, null, false, MRSolver.TOL1, MRSolver.TOL2, false, false);
 	}
 
 	public CMRxGMFits(int nSample, GeneralModel gm, double shrinkage, DoubleMatrix2D model,
 			HashSet<SimpleLinearConstraint>[] adj, int proc, boolean cheapP, boolean onlySTAMR) {
-		this(nSample, gm, shrinkage, shrinkage < 0, model, adj, proc, cheapP, null, onlySTAMR, MRSolver.TOL1, MRSolver.TOL2);
+		this(nSample, gm, shrinkage, shrinkage < 0, model, adj, proc, cheapP, null, onlySTAMR, MRSolver.TOL1, MRSolver.TOL2, false, false);
 	}
 
 	public CMRxGMFits(int nSample, GeneralModel gm, double shrinkage, DoubleMatrix2D model,
 			HashSet<SimpleLinearConstraint>[] adj, int proc, boolean cheapP, FitListener listner, double mrTol1, double mrTol2) {
-		this(nSample, gm, shrinkage, shrinkage < 0, model, adj, proc, cheapP, listner, false, mrTol1, mrTol2);
+		this(nSample, gm, shrinkage, shrinkage < 0, model, adj, proc, cheapP, listner, false, mrTol1, mrTol2, false, false);
 	}
 
-	public CMRxGMFits(int nSample, GeneralModel gm, double shrink, DenseDoubleMatrix2D denseDoubleMatrix2D,
-			HashSet<SimpleLinearConstraint>[] dMatAs, int proc, boolean cheapP2, boolean onlySTAMR, double mrTol1, double mrTol2) {
-		this(nSample, gm, shrink, onlySTAMR, denseDoubleMatrix2D, dMatAs, proc, cheapP2, null, onlySTAMR, mrTol1, mrTol2);
+	public CMRxGMFits(int nSample, GeneralModel gm, double shrink, DoubleMatrix2D denseDoubleMatrix2D,
+			HashSet<SimpleLinearConstraint>[] dMatAs, int proc, boolean cheapP, boolean onlySTAMR, double mrTol1, double mrTol2) {
+		this(nSample, gm, shrink, shrink < 0, denseDoubleMatrix2D, dMatAs, proc, cheapP, null, onlySTAMR, mrTol1, mrTol2, false, false);
+	}
+
+	public CMRxGMFits(int nSample, GeneralModel gm, double shrink, DoubleMatrix2D denseDoubleMatrix2D,
+			HashSet<SimpleLinearConstraint>[] dMatAs, int proc, boolean cheapP2, boolean onlySTAMR, double mrTol1, double mrTol2,
+			boolean approximate) {
+		this(nSample, gm, shrink, shrink < 0, denseDoubleMatrix2D, dMatAs, proc, cheapP2, null, onlySTAMR, mrTol1, mrTol2, approximate,
+				false);
+	}
+
+	public CMRxGMFits(int nSample, GeneralModel gm, double shrink, DoubleMatrix2D denseDoubleMatrix2D,
+			HashSet<SimpleLinearConstraint>[] dMatAs, int proc, boolean cheapP2, boolean onlySTAMR, double mrTol1, double mrTol2,
+			boolean approximate, boolean reverse) {
+		this(nSample, gm, shrink, shrink < 0, denseDoubleMatrix2D, dMatAs, proc, cheapP2, null, onlySTAMR, mrTol1, mrTol2, approximate,
+				reverse);
 	}
 
 	/**
@@ -85,7 +101,7 @@ public class CMRxGMFits implements Fits {
 	 */
 	private CMRxGMFits(int nSample, GeneralModel gm, double shrinkage, boolean autoShrink, DoubleMatrix2D model,
 			HashSet<SimpleLinearConstraint>[] adj, int proc, boolean cheapP, FitListener listener, boolean onlySTAMR, double mrTolerance1,
-			double mrTolerance2) {
+			double mrTolerance2, boolean approximate, boolean reverse) {
 		this.gm = gm;
 		this.model = model;
 		this.shrinkage = shrinkage;
@@ -93,14 +109,17 @@ public class CMRxGMFits implements Fits {
 		this.adj = adj;
 		this.cheapP = cheapP;
 		this.listener = listener;
+		this.onlySTAMR = onlySTAMR;
 		int[] depVar = gm.getNDepVar();
 		int[] conds = gm.getNBSConds();
 		nVar = depVar.length;
 		nCond = conds.length;
 		if (onlySTAMR)
-			solver = new STASolver();
-		else
+			solver = new STASolver(reverse);
+		else {
 			solver = new CMRxSolver();
+			solver.setOnlyFeas(approximate);
+		}
 		solver.setEasyFail(true);
 		solver.setMrTolerance1(mrTolerance1);
 		solver.setMrTolerance2(mrTolerance2);
@@ -139,7 +158,7 @@ public class CMRxGMFits implements Fits {
 		initSoln = null;
 
 		if (adj != null && adj.length > 0 && !onlySTAMR) {
-			MRSolverAJOptimiser mrSolver = new MRSolverAJOptimiser();
+			mrSolver = reverse ? new MRSolverReverse() : new MRSolverAJOptimiser();
 			mrSolver.setTolerance(mrTolerance1, mrTolerance2);
 			// Take away MR from dataFit
 			for (int v = 0; v < nVar; v++) {
@@ -230,12 +249,22 @@ public class CMRxGMFits implements Fits {
 				}
 
 				fits[index] = tmpSolution.getFStar();
+
+				if (adj != null && adj.length > 0 && !onlySTAMR) {
+					// Take away MR from fit
+					for (int v = 0; v < nVar; v++) {
+						MRProblem problem = new MRProblem(tmpProblem.getMeans()[v], tmpProblem.getWeights()[v], adj[v]);
+						problem.forceSymetry();
+						fits[index] -= mrSolver.solve(problem).getfVal();
+					}
+				}
+
 				needSoln = false;
 			}
 
 			times[index] = (System.nanoTime() - start) / 1000000000.0;
 
-			//System.out.println(times[index]);
+			// System.out.println(times[index]);
 
 			badnesses[index] = worst;
 

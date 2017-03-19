@@ -69,6 +69,22 @@ public class FitsTests {
 	}
 
 	@Test
+	public void fitApproxTest() {
+		CMRxFitsProblem problem = new CMRxFitsProblem(getMeansSK1(), getWeightsSK1(), null, model1, getNSK1(),
+				getCovSK1());
+
+		long start1 = System.nanoTime();
+		new CMRxFits(20, problem, -1, 0, false, false, 0, 0, false);
+		long end1 = System.nanoTime();
+
+		long start2 = System.nanoTime();
+		new CMRxFits(20, problem, -1, 0, false, false, 0, 0, true);
+		long end2 = System.nanoTime();
+
+		assertTrue(end1 - start1 > end2 - start2);
+	}
+
+	@Test
 	public void fitsModel5GMTest() {
 		CMRxFitsGMProblemMaker maker = new CMRxFitsGMProblemMaker();
 		maker.addCell(1, 1,

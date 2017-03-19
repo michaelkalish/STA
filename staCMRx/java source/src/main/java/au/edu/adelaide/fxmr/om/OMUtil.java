@@ -15,6 +15,8 @@ import gnu.trove.set.hash.TIntHashSet;
 
 public class OMUtil {
 
+	private static final double DEFAULT_TOL = 1e-8;
+
 	/**
 	 * returns reduced form of a if not full rank
 	 * 
@@ -149,9 +151,11 @@ public class OMUtil {
 	 * 
 	 * @param a
 	 *            n * k matrix n >= k
+	 * @param tol
+	 *            is a tolerance value for functional zeros
 	 * @return
 	 */
-	public static int[][] circuits(DoubleMatrix2D a) {
+	public static int[][] circuits(DoubleMatrix2D a, double tol) {
 		// DoubleMatrix2D x = checkRank(a);
 		int[][] c = null;
 		int rows = a.rows();
@@ -168,8 +172,11 @@ public class OMUtil {
 					DoubleMatrix2D xsub = a.viewSelection(curIter, null);
 					DoubleMatrix1D cp = genCrossProd(xsub);
 
-					for (int j = 0; j < cols + 1; j++)
-						c[i][curIter[j]] = (int) Math.signum(cp.get(j));
+					for (int j = 0; j < cols + 1; j++) {
+						double val = cp.get(j);
+						if (Math.abs(val) >= tol)
+							c[i][curIter[j]] = (int) Math.signum(val);
+					}
 
 					i++;
 				}
@@ -188,6 +195,10 @@ public class OMUtil {
 			Arrays.sort(c, new NegAbsIntArrayComparitor());
 		}
 		return c;
+	}
+
+	public static int[][] circuits(DoubleMatrix2D a) {
+		return circuits(a, DEFAULT_TOL);
 	}
 
 	/**
@@ -353,12 +364,12 @@ public class OMUtil {
 	 * @param a
 	 * @return
 	 */
-	public static int[][] covectors(DoubleMatrix2D a) {
+	public static int[][] covectors(DoubleMatrix2D a, double tol) {
 		// DoubleMatrix2D x = checkRank(a);
 		// if (x.size() == 0)
 		// return null;
 
-		int[][] c = circuits(a);
+		int[][] c = circuits(a, tol);
 		int[][] d = allSignVectors(a.rows());
 		if (c == null)
 			return d;
@@ -399,6 +410,10 @@ public class OMUtil {
 		return cv;
 	}
 
+	public static int[][] covectors(DoubleMatrix2D a) {
+		return covectors(a, DEFAULT_TOL);
+	}
+	
 	/**
 	 * returns the closure of a set of a sign vectors for two sign vectors s and
 	 * t, if t_i = s_i or t_i = 0, then t is an element of the sign closure of s
@@ -500,8 +515,7 @@ public class OMUtil {
 	 * @param a
 	 * @return
 	 */
-	public static int[][] vectors(DoubleMatrix2D a) {
-		double tol = 1e-10;
+	public static int[][] vectors(DoubleMatrix2D a, double tol) {
 		// TODO: I probably dont need check rank!
 		DoubleMatrix2D x = checkRank(a);
 
@@ -514,13 +528,18 @@ public class OMUtil {
 		int rows = x.rows();
 		int columns = x.columns();
 		for (int row = rows; --row >= 0;)
-			for (int column = columns; --column >= 0;)
+			for (int column = columns; --column >= 0;){
 				if (Math.abs(x.getQuick(row, column)) < tol)
 					x.setQuick(row, column, 0);
+			}
 
 		return covectors(x.viewDice());
 	}
 
+	public static int[][] vectors(DoubleMatrix2D a){
+		return vectors(a, DEFAULT_TOL);
+	}
+	
 	/**
 	 * returns dimension of sign vector z
 	 * 

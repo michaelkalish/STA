@@ -19,29 +19,38 @@ import cern.jet.math.Functions;
  */
 public class MultivariateNormalDistribution {
 	private DoubleMatrix2D L;
-	private DoubleMatrix1D tmpRands;
-	private DoubleMatrix1D tmpResult;
+
 	private Random rand;
 	private double[] means;
 	private DoubleMatrix1D meansVec;
+	private int n;
+	private boolean symPosDef = true;
+
+	public boolean isSymPosDef() {
+		return symPosDef;
+	}
 
 	public MultivariateNormalDistribution(double[] means, DoubleMatrix2D cov) {
-		this(means, cov, System.currentTimeMillis());
+		this(means, cov, (long) (Math.random() * Long.MAX_VALUE));
 	}
 
 	public MultivariateNormalDistribution(double[] means, DoubleMatrix2D cov, long seed) {
-		int n = means.length;
+		n = means.length;
 		meansVec = new DenseDoubleMatrix1D(means);
 		CholeskyDecomposition chol = new CholeskyDecomposition(cov);
 
+		if (!chol.isSymmetricPositiveDefinite())
+			symPosDef = false;
+
 		this.rand = new Random(seed);
 		this.L = chol.getL();
-		this.tmpRands = new DenseDoubleMatrix1D(n);
-		this.tmpResult = new DenseDoubleMatrix1D(n);
 		this.means = means;
 	}
 
 	public double[] sample(double[] ans) {
+		DoubleMatrix1D tmpRands = new DenseDoubleMatrix1D(n);
+		DoubleMatrix1D tmpResult = new DenseDoubleMatrix1D(n);
+
 		int n = means.length;
 		for (int i = 0; i < n; i++)
 			tmpRands.setQuick(i, rand.nextGaussian());
@@ -54,6 +63,9 @@ public class MultivariateNormalDistribution {
 	}
 
 	public void fill(DoubleMatrix2D ans) {
+		// TODO: could speed this up by allocating a thread safe tmpRands?
+		DoubleMatrix1D tmpRands = new DenseDoubleMatrix1D(n);
+
 		int n = means.length;
 		int rows = ans.rows();
 		for (int r = 0; r < rows; r++) {

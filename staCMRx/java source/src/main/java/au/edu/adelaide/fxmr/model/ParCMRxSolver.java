@@ -113,7 +113,8 @@ public class ParCMRxSolver {
 
 		// Get a reasonable upper bound
 		TIntObjectHashMap<int[]> zDecodeCache = new TIntObjectHashMap<>();
-		CMRxTrial bestGreedy = CMRxSolver.getFeasible6(problem, mrSolver, zDecodeCache);
+		CMRxTrial bestGreedy = CMRxSolver.getFeasibleX(problem, mrSolver, zDecodeCache);
+
 		if (bestGreedy != null) {
 			xBar = bestGreedy.getxPrime();
 			fBar = bestGreedy.getF();
@@ -146,7 +147,8 @@ public class ParCMRxSolver {
 		// Add one last item to iter to make it pretty
 		iter.add(new CMRIter(fBar, fBar, fBar, remaining.size()));
 
-		return problem.createSolution(fBar, xBar, iter, (double) (System.nanoTime() - start) / 1_000_000_000, adjBar, mrSolver.getCalls(), fBarReductions);
+		return problem.createSolution(fBar, xBar, iter, (double) (System.nanoTime() - start) / 1_000_000_000, adjBar, mrSolver.getCalls(),
+				fBarReductions);
 	}
 
 	public double getTolerance() {
@@ -314,7 +316,8 @@ public class ParCMRxSolver {
 					if (sl != null && System.currentTimeMillis() > nextUpdate.get()) {
 						nextUpdate.set(System.currentTimeMillis() + updateFreq);
 
-						running = sl.updateStatus(fFloor, fBar, upperFloor, remaining.size(), nIterThread, collisions, fBarReductions, cyclesAvoided);
+						running = sl.updateStatus(fFloor, fBar, upperFloor, remaining.size(), nIterThread, collisions, fBarReductions,
+								cyclesAvoided);
 					}
 				}
 			} catch (Exception e) {

@@ -64,16 +64,20 @@ public class StatsSTA {
 		if (n > 1) {
 			covariance = MRUtil.covariance(data);
 			ShrinkDiagonal sd = new ShrinkDiagonal(data);
-
-			EigenvalueDecomposition eig = new EigenvalueDecomposition(covariance);
-			double cond = MRUtil.cond(eig);
-
 			boolean posDef = true;
-			for (double s : eig.getRealEigenvalues().toArray())
-				if (s <= 0) {
-					posDef = false;
-					break;
-				}
+			double cond = 0;
+			try {
+				EigenvalueDecomposition eig = new EigenvalueDecomposition(covariance);
+				cond = MRUtil.cond(eig);
+
+				for (double s : eig.getRealEigenvalues().toArray())
+					if (s <= 0) {
+						posDef = false;
+						break;
+					}
+			} catch (Exception e) {
+				posDef = false;
+			}
 
 			if (cond < 1e6 && posDef) {
 				// Normal behaviour
@@ -89,19 +93,18 @@ public class StatsSTA {
 			regCovariance = sd.getResult();
 
 			try {
-				eig = new EigenvalueDecomposition(regCovariance);
+				EigenvalueDecomposition eig = new EigenvalueDecomposition(regCovariance);
+				cond = MRUtil.cond(eig);
+				posDef = true;
+				for (double s : eig.getRealEigenvalues().toArray())
+					if (s <= 0) {
+						posDef = false;
+						break;
+					}
+
 			} catch (ArrayIndexOutOfBoundsException e) {
-				System.out.println(regCovariance);
-				System.out.println(data);
-				e.printStackTrace();
+				posDef=false;
 			}
-			cond = MRUtil.cond(eig);
-			posDef = true;
-			for (double s : eig.getRealEigenvalues().toArray())
-				if (s <= 0) {
-					posDef = false;
-					break;
-				}
 
 			if (cond > 1e6 || !posDef) {
 				MRUtil.forceDiagonal(regCovariance);

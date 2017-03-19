@@ -41,8 +41,8 @@ public class MRProblem implements Cloneable {
 	 */
 	private transient SimpleLinearConstraint newestSingleConstraint;
 	/**
-	 * When cloning an MRProblem, store the previous optimal result to be used as
-	 * the next starting point.
+	 * When cloning an MRProblem, store the previous optimal result to be used
+	 * as the next starting point.
 	 */
 	private double[] previousSolution;
 
@@ -67,11 +67,11 @@ public class MRProblem implements Cloneable {
 	 * Contructor
 	 * 
 	 * @param y
-	 *           TODO
+	 *            TODO
 	 * @param weights
-	 *           TODO
+	 *            TODO
 	 * @param rangeSet
-	 *           TODO (make comment about zero indexing?)
+	 *            TODO (make comment about zero indexing?)
 	 */
 	public MRProblem(double[] y, double[][] weights, int[][] rangeSet) {
 		this.y = y;
@@ -345,9 +345,9 @@ public class MRProblem implements Cloneable {
 	}
 
 	/**
-	 * Given an initial point, skew it to satisfy the newest constraint. Will not
-	 * work with cycles (detects if the constraint includes the given and returns
-	 * null).
+	 * Given an initial point, skew it to satisfy the newest constraint. Will
+	 * not work with cycles (detects if the constraint includes the given and
+	 * returns null).
 	 * 
 	 * @param distanceScale
 	 * @param initialPoint
@@ -435,7 +435,8 @@ public class MRProblem implements Cloneable {
 	 * @param eq
 	 * @return
 	 */
-	private boolean findCycle(int initial, int current, boolean[] cycle, boolean[] used, HashSet<SimpleLinearConstraint> ineq, boolean subSearch) {
+	private boolean findCycle(int initial, int current, boolean[] cycle, boolean[] used, HashSet<SimpleLinearConstraint> ineq,
+			boolean subSearch) {
 		if (cycle[initial] && initial == current)
 			return true;
 
@@ -522,5 +523,29 @@ public class MRProblem implements Cloneable {
 			check.assign(Functions.div(2));
 			weights.assign(check);
 		}
+	}
+
+	/**
+	 * Clone this MRProblem
+	 * 
+	 * @return
+	 */
+	public MRProblem invertConstraints() {
+		try {
+			MRProblem newProblem = (MRProblem) super.clone();
+			newProblem.newestSingleConstraint = null;
+			newProblem.previousSolution = null;
+			newProblem.matIneq = new HashSet<>();
+			//Reverse constraints
+			for (SimpleLinearConstraint slc : matIneq)
+				newProblem.matIneq.add(new SimpleLinearConstraint(slc.getNegIndex(), slc.getPosIndex()));
+			return newProblem;
+		} catch (CloneNotSupportedException e) {
+			return null;
+		}
+	}
+	
+	public SimpleLinearConstraint getNewestSingleConstraint() {
+		return newestSingleConstraint;
 	}
 }
