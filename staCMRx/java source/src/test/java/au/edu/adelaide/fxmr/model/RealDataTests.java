@@ -75,7 +75,7 @@ public class RealDataTests {
 	@Test
 	public void tolerance6Test() {
 		double tol = 0.5;
-		
+
 		CMRxProblem problem = new CMRxProblem(getMeansSK1(), getWeightsSK1(), null, model6);
 		// System.out.println(problem.toMatlab());
 		ParCMRxSolver solver = new ParCMRxSolver();

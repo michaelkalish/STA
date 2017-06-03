@@ -7,6 +7,7 @@ import au.edu.adelaide.fxmr.joptimizer.functions.SimpleLinearConstraint;
 import au.edu.adelaide.fxmr.joptimizer.optimizers.OptimizationRequest;
 import au.edu.adelaide.fxmr.joptimizer.optimizers.OptimizationResponse;
 import au.edu.adelaide.fxmr.joptimizer.optimizers.PrimalDualMethod;
+import cern.colt.Arrays;
 import cern.colt.matrix.DoubleMatrix1D;
 import cern.colt.matrix.DoubleMatrix2D;
 import cern.colt.matrix.impl.DenseDoubleMatrix1D;
@@ -29,6 +30,9 @@ public class MRSolverAJOptimiser extends MRSolver {
 	private int free = 0;
 
 	private boolean allowCyclicProblems = true;
+	
+	//private static double maxTime = 0;
+	
 
 	public MRSolution solve(MRProblem p) {// throws CatastrophicMRFailure {
 		if (p.constraintsAlreadySatisfied()) {
@@ -93,6 +97,19 @@ public class MRSolverAJOptimiser extends MRSolver {
 			if (returnCode == OptimizationResponse.SUCCESS) {
 				double[] soln = pdm.getOptimizationResponse().getSolution();
 				s = new MRSolution(p, soln, (double) (System.nanoTime() - start) / 1_000_000_000.0, pdm.getIteration());
+				
+				// if (s.getTimeS() > maxTime){
+				// maxTime = s.getTimeS();
+				// System.out.println(maxTime);
+				// System.out.println(objectiveFunction.getP());
+				// System.out.println(objectiveFunction.getQ());
+				// System.out.println(objectiveFunction.getR());
+				// System.out.println(eq);
+				// System.out.println(ineq);
+				// System.out.println(Arrays.toString(initial));
+				// System.out.println(pdm.getIteration());
+				// }
+				
 			}
 		} catch (Exception e) {
 			// Not too worried at this point - s will be null

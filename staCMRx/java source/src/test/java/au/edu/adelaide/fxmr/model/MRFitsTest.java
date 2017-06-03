@@ -263,7 +263,7 @@ public class MRFitsTest {
 			for (int var = 0; var < nvar; var++)
 				problem.addCell(group, var, data[group][var]);
 
-		Fits sol = problem.solve(200, -1, false, true, 0, 0);
+		Fits sol = problem.solve(300, -1, false, true, 0, 0);
 
 		// Be careful - it's possible these may fail and that's ok (sometimes)
 		assertTrue(sol.getP() > 0.04);
@@ -303,7 +303,7 @@ public class MRFitsTest {
 		problem.addAdj(nCond, index, new int[] { 7, 8, 9, 10, 11, 12 });
 		problem.dupeAdj(nvar);
 
-		Fits sol = new CMRxFits(220, problem.getProblem(), -1, 0, false, true, 0, 0);
+		Fits sol = new CMRxFits(300, problem.getProblem(), -1, 0, false, true, 0, 0);
 
 		// System.out.println(sol.getP());
 		// System.out.println(sol.getDataFit());
@@ -354,7 +354,7 @@ public class MRFitsTest {
 		// System.out.println(Arrays.toString(sol.getFits()));
 
 		// Be careful - it's possible these may fail and that's ok (sometimes)
-		assertTrue(sol.getP() > 0.01);
-		assertTrue(sol.getP() < 0.05);
+		assertTrue(sol.getP() > 0.005);
+		assertTrue(sol.getP() < 0.06);
 	}
 }

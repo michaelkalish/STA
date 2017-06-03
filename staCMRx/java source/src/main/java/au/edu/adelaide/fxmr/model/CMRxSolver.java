@@ -199,17 +199,18 @@ public class CMRxSolver {
 									tmpCVSet[nS++] = i;
 
 							if (nS > 0) {
+								boolean useful = true;
 								CMRxTrial newTrial = current.split(newTrialID++);
 
 								for (int i = 0; i < nS; i++) {
 									int k = tmpCVSet[i];
 									if (covector[k] > 0)
-										newTrial.addConstraint(k, posIndex, negIndex);
+										useful |= newTrial.addConstraint(k, posIndex, negIndex);
 									if (covector[k] < 0)
-										newTrial.addConstraint(k, negIndex, posIndex);
+										useful |= newTrial.addConstraint(k, negIndex, posIndex);
 								}
 
-								if (!visited.contains(newTrial)) {
+								if (useful && !visited.contains(newTrial)) {
 									remaining.add(newTrial);
 									visited.add(newTrial);
 								}

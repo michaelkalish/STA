@@ -272,9 +272,7 @@ public class ChealTests {
 		// This is just a test to make sure we can do 1000 fast enough
 		Fits sol = pm.solve(1, Runtime.getRuntime().availableProcessors());
 
-		assertEquals(43.177404309909065, sol.getDataFit(), 1e-14);
-
-		System.out.println(sol.getDataFit());
+		assertEquals(43.177404309910266, sol.getDataFit(), 1e-8);
 
 		// System.out.println(sol.getP());
 		// System.out.println(Arrays.toString(sol.getBadnesses()));

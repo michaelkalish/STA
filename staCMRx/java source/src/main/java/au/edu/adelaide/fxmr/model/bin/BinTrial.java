@@ -4,6 +4,7 @@ import java.util.HashSet;
 
 import au.edu.adelaide.fxmr.data.BinElement;
 import au.edu.adelaide.fxmr.joptimizer.functions.SimpleLinearConstraint;
+import au.edu.adelaide.fxmr.model.HashableAdjSet;
 import au.edu.adelaide.fxmr.model.mr.MRProblem;
 import au.edu.adelaide.fxmr.model.mr.MRSolution;
 import au.edu.adelaide.fxmr.model.mr.MRSolver;
@@ -16,6 +17,7 @@ public class BinTrial implements Comparable<BinTrial> {
 	private MRSolution[] solutions;
 	private int index;
 	private BinElement[] binElements;
+	private HashableAdjSet hAdjSet;
 
 	public BinTrial(int[][] rangeSet, int nvar, BinElement[] subj) {
 		xPrime = new double[nvar][];
@@ -25,12 +27,20 @@ public class BinTrial implements Comparable<BinTrial> {
 		g2 = Double.NEGATIVE_INFINITY;
 		index = -1;
 		binElements = subj;
-		for (int i = 0; i < nvar; i++)
+		for (int i = 0; i < nvar; i++){
 			// n == weights
 			problems[i] = new MRProblem(subj[i].getMeans(), subj[i].getN(), rangeSet);
+		}
+		hAdjSet = new HashableAdjSet(problems);
 	}
 
 	private BinTrial() {
+	}
+
+	public void clear() {
+		xPrime = null;
+		solutions = null;
+		binElements = null;
 	}
 
 	@Override
@@ -118,6 +128,49 @@ public class BinTrial implements Comparable<BinTrial> {
 		return sb.toString();
 	}
 
+	public boolean addConstraint(int k, int posIndex, int negIndex) {
+		// k variable
+		double[] curXVector = solutions[k].getxVector();
+		problems[k] = (MRProblem) problems[k].clone();
+		if (!problems[k].addConstraint(posIndex, negIndex, curXVector))
+			// The constraint already existed!
+			return false;
+		// Check feasability of current (old) solution
+		if (curXVector[posIndex] >= curXVector[negIndex])
+			solutions[k] = null;
+		hAdjSet = new HashableAdjSet(problems);
+		return true;
+	}
+
+	public BinTrial split(int k, int posIndex, int negIndex, int index) {
+		BinTrial newTrial = split(index);
+
+		if (!newTrial.addConstraint(k, posIndex, negIndex))
+			return null;
+		return newTrial;
+	}
+
+	public BinTrial split(int index) {
+		BinTrial newTrial = new BinTrial();
+		int nvar = this.problems.length;
+
+		newTrial.index = index;
+		newTrial.xPrime = new double[nvar][];
+		newTrial.problems = new MRProblem[nvar];
+		newTrial.solutions = new MRSolution[nvar];
+		newTrial.binElements = binElements;
+		newTrial.f = f;
+		newTrial.g2 = g2;
+		newTrial.hAdjSet = hAdjSet;
+
+		for (int i = 0; i < nvar; i++) {
+			newTrial.problems[i] = problems[i];
+			newTrial.solutions[i] = solutions[i];
+		}
+
+		return newTrial;
+	}
+
 	public BinTrial split(int negIndex, int posIndex, int index) {
 		BinTrial newTrial = new BinTrial();
 		int nvar = this.problems.length;
@@ -138,7 +191,8 @@ public class BinTrial implements Comparable<BinTrial> {
 			if (curXVector[negIndex] < curXVector[posIndex])
 				newTrial.solutions[i] = solutions[i];
 		}
-
+		hAdjSet = new HashableAdjSet(problems);
+		
 		return newTrial;
 	}
 
@@ -148,5 +202,50 @@ public class BinTrial implements Comparable<BinTrial> {
 		for (int i = 0; i < problems.length; i++)
 			adjs[i] = problems[i].getMatIneq();
 		return adjs;
+	}
+
+	public double[][] getxPrime() {
+		return xPrime;
+	}
+
+	@Override
+	public int hashCode() {
+		final int prime = 31;
+		int result = 1;
+		for (MRProblem p : problems)
+			result = prime * result + p.getMatIneq().hashCode();
+		return result;
+	}
+
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj)
+			return true;
+		if (obj == null)
+			return false;
+		if (getClass() != obj.getClass())
+			return false;
+		BinTrial other = (BinTrial) obj;
+
+		int n = problems.length;
+		if (n != other.problems.length)
+			return false;
+		for (int i = 0; i < n; i++)
+			if (!problems[i].getMatIneq().equals(other.problems[i].getMatIneq()))
+				return false;
+
+		return true;
+	}
+
+	public int countAdj() {
+		int adjN = 0;
+		for (MRProblem p : problems) {
+			adjN += p.getMatIneq().size();
+		}
+		return adjN;
+	}
+
+	public HashableAdjSet gethAdjSet() {
+		return hAdjSet;
 	}
 }

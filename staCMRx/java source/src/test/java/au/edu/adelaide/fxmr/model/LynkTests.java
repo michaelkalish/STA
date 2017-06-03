@@ -533,6 +533,6 @@ public class LynkTests {
 
 		// 10 = 73s
 		// 100 = 562s
-		CMRxGMFits fits = new CMRxGMFits(1, maker.getGm(), -1, model, p.getAdj(), -1, false, null, 1e-8, 1e-5);
+		CMRxGMFits fits = new CMRxGMFits(1, maker.getGm(), -1, model, p.getAdj(), -1, false, false, 1e-8, 1e-5);
 	}
 }

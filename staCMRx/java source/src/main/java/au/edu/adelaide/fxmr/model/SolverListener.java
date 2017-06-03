@@ -2,7 +2,7 @@ package au.edu.adelaide.fxmr.model;
 
 public interface SolverListener {
 
-	public void updateStatus(String string);
+	public boolean updateStatus(String string);
 
 	public void setFinished();
 

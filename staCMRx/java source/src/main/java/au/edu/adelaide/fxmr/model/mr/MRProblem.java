@@ -1,6 +1,5 @@
 package au.edu.adelaide.fxmr.model.mr;
 
-import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
@@ -12,6 +11,7 @@ import cern.colt.matrix.DoubleMatrix2D;
 import cern.colt.matrix.impl.SparseDoubleMatrix2D;
 import cern.colt.matrix.linalg.Algebra;
 import cern.jet.math.Functions;
+import gnu.trove.set.hash.TIntHashSet;
 
 /**
  * Defines the input for the MR problem
@@ -33,6 +33,8 @@ public class MRProblem implements Cloneable {
 
 	/**
 	 * Inequality Constraints
+	 * 
+	 * TODO: this could possibly be replaced with an ArrayList - the hash is never used properly.
 	 */
 	private transient HashSet<SimpleLinearConstraint> matIneq = new HashSet<>();
 
@@ -173,18 +175,17 @@ public class MRProblem implements Cloneable {
 	}
 
 	public boolean addConstraint(int posIndex, int negIndex, double[] previousSolution) {
-		this.previousSolution = previousSolution;
-		newestSingleConstraint = new SimpleLinearConstraint(posIndex, negIndex);
-		if (matIneq.add(newestSingleConstraint)) {
-			if (previousSolution == null)
-				newestSingleConstraint = null;
-			return true;
+		for (SimpleLinearConstraint con : matIneq) {
+			if (con.getNegIndex() == negIndex && con.getPosIndex() == posIndex || con.getNegIndex() == posIndex && con.getPosIndex() == negIndex)
+				// Dont allow the same constraint to be added OR the reverse
+				// constraint to be added!
+				return false;
 		}
 
-		// The new constraint already existed...
-		newestSingleConstraint = null;
-		this.previousSolution = null;
-		return false;
+		this.previousSolution = previousSolution;
+		newestSingleConstraint = new SimpleLinearConstraint(posIndex, negIndex);
+		matIneq.add(newestSingleConstraint);
+		return true;
 	}
 
 	public String toString() {
@@ -204,8 +205,20 @@ public class MRProblem implements Cloneable {
 	public boolean testFeas(double[] initial) {
 		for (SimpleLinearConstraint c : matIneq) {
 			double value = c.value(initial);
-			if (value > 0)
+			if (value > 0) {
 				return false;
+			}
+		}
+
+		return true;
+	}
+
+	public boolean testUnstrictFeas(double[] initial) {
+		for (SimpleLinearConstraint c : matIneq) {
+			double value = c.value(initial);
+			if (value >= 0) {
+				return false;
+			}
 		}
 
 		return true;
@@ -228,17 +241,7 @@ public class MRProblem implements Cloneable {
 			// First attempt to modify the previous solution
 			double[] modifiedStart = findSimpleStart(distanceScale, previousSolution);
 			if (modifiedStart != null) {
-				boolean ok = true;
-				for (SimpleLinearConstraint c : matIneq) {
-					double value = c.value(modifiedStart);
-					// This often happens when there is an undetected cycle
-					if (value >= 0) {
-						ok = false;
-						break;
-					}
-				}
-
-				if (ok) {
+				if (testUnstrictFeas(modifiedStart)) {
 					ineq.addAll(matIneq);
 					return modifiedStart;
 				}
@@ -291,6 +294,18 @@ public class MRProblem implements Cloneable {
 		cycle = null;
 
 		if (cycleSets == null) {
+			// if (thinkCycle) {
+			// System.out.println("ATOMIC FAILE!");
+			// double[] modifiedStart = findSimpleStart(distanceScale,
+			// previousSolution);
+			//
+			// System.out.println(Arrays.toString(previousSolution));
+			// System.out.println(matIneq);
+			// System.out.println(newestSingleConstraint);
+			// System.out.println(Arrays.toString(modifiedStart));
+			//
+			// }
+
 			// Simplest case
 			return findAcyclicStart(meand, ineq, used, n);
 		}
@@ -346,8 +361,7 @@ public class MRProblem implements Cloneable {
 
 	/**
 	 * Given an initial point, skew it to satisfy the newest constraint. Will
-	 * not work with cycles (detects if the constraint includes the given and
-	 * returns null).
+	 * not work with cycles but that is detected elsewhere.
 	 * 
 	 * @param distanceScale
 	 * @param initialPoint
@@ -358,29 +372,66 @@ public class MRProblem implements Cloneable {
 		double[] newPoint = new double[n];
 		System.arraycopy(initialPoint, 0, newPoint, 0, n);
 
-		boolean updated[] = new boolean[n];
-		ArrayDeque<Integer> toVisit = new ArrayDeque<>(n);
-		double dist = initialPoint[newestSingleConstraint.getPosIndex()] - initialPoint[newestSingleConstraint.getNegIndex()];
+		int posStart = newestSingleConstraint.getPosIndex();
+		int negStart = newestSingleConstraint.getNegIndex();
 
-		if (dist == 0)
-			dist = distanceScale;
+		double distAdd = (initialPoint[posStart] - initialPoint[negStart]) / 2;
+		if (distAdd == 0)
+			distAdd = distanceScale;
 		else
-			dist *= 1.0 + distanceScale;
+			distAdd *= 1.0 + distanceScale;
 
-		toVisit.push(newestSingleConstraint.getPosIndex());
-		updated[newestSingleConstraint.getNegIndex()] = true;
+		ArrayList<SimpleLinearConstraint> ineq = new ArrayList<>(matIneq);
+		ineq.remove(newestSingleConstraint);
 
-		while (!toVisit.isEmpty()) {
-			int visiting = toVisit.pollLast();
-			if (updated[visiting])
-				// Cycle somewhere!
-				return null;
-			updated[visiting] = true;
-			newPoint[visiting] -= dist;
+		TIntHashSet decremented = new TIntHashSet();
+		TIntHashSet incremented = new TIntHashSet();
+		newPoint[posStart] -= distAdd;
+		decremented.add(posStart);
+		newPoint[negStart] += distAdd;
+		incremented.add(negStart);
 
-			for (SimpleLinearConstraint c : matIneq)
-				if (c.getNegIndex() == visiting && c != newestSingleConstraint)
-					toVisit.push(c.getPosIndex());
+		boolean[] changedVal = new boolean[n];
+		changedVal[posStart] = true;
+		changedVal[negStart] = true;
+
+		boolean changed = true;
+		while (!ineq.isEmpty() && changed) {
+			changed = false;
+			Iterator<SimpleLinearConstraint> iter = ineq.iterator();
+			while (iter.hasNext()) {
+				SimpleLinearConstraint cur = iter.next();
+				if (decremented.contains(cur.getNegIndex())) {
+					if (changedVal[cur.getPosIndex()])
+						// Cycle!
+						return null;
+					changedVal[cur.getPosIndex()] = true;
+
+					double diff = cur.value(newPoint);
+					if (diff > 0) {
+						newPoint[cur.getPosIndex()] -= diff * (1 + distanceScale);
+					}
+
+					decremented.add(cur.getPosIndex());
+					iter.remove();
+					changed = true;
+					break;
+				} else if (incremented.contains(cur.getPosIndex())) {
+					if (changedVal[cur.getNegIndex()])
+						// Cycle!
+						return null;
+					changedVal[cur.getNegIndex()] = true;
+					double diff = cur.value(newPoint);
+					if (diff > 0) {
+						newPoint[cur.getNegIndex()] += diff * (1 + distanceScale);
+					}
+
+					incremented.add(cur.getNegIndex());
+					iter.remove();
+					changed = true;
+					break;
+				}
+			}
 		}
 
 		return newPoint;
@@ -526,7 +577,7 @@ public class MRProblem implements Cloneable {
 	}
 
 	/**
-	 * Clone this MRProblem
+	 * Clone this MRProblem, inverting the constraints
 	 * 
 	 * @return
 	 */
@@ -536,7 +587,7 @@ public class MRProblem implements Cloneable {
 			newProblem.newestSingleConstraint = null;
 			newProblem.previousSolution = null;
 			newProblem.matIneq = new HashSet<>();
-			//Reverse constraints
+			// Reverse constraints
 			for (SimpleLinearConstraint slc : matIneq)
 				newProblem.matIneq.add(new SimpleLinearConstraint(slc.getNegIndex(), slc.getPosIndex()));
 			return newProblem;
@@ -544,7 +595,7 @@ public class MRProblem implements Cloneable {
 			return null;
 		}
 	}
-	
+
 	public SimpleLinearConstraint getNewestSingleConstraint() {
 		return newestSingleConstraint;
 	}

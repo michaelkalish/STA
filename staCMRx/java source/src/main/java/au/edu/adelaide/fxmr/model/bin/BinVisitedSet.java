@@ -1,16 +1,17 @@
-package au.edu.adelaide.fxmr.model;
+package au.edu.adelaide.fxmr.model.bin;
 
 import java.util.ArrayList;
 import java.util.HashSet;
+import au.edu.adelaide.fxmr.model.HashableAdjSet;
 
-public class VisitedSet {
+public class BinVisitedSet {
 	private HashSet<HashableAdjSet> store = new HashSet<>();
 
-	public boolean add(CMRxTrial current) {
+	public boolean add(BinTrial current) {
 		return store.add(current.gethAdjSet());
 	}
 
-	public boolean contains(CMRxTrial newTrial) {
+	public boolean contains(BinTrial newTrial) {
 		return store.contains(newTrial.gethAdjSet());
 	}
 
@@ -18,8 +19,8 @@ public class VisitedSet {
 		return store.size();
 	}
 
-	public void addAll(ArrayList<CMRxTrial> tmpTrials) {
-		for (CMRxTrial t : tmpTrials)
+	public void addAll(ArrayList<BinTrial> tmpTrials) {
+		for (BinTrial t : tmpTrials)
 			add(t);
 	}
 }

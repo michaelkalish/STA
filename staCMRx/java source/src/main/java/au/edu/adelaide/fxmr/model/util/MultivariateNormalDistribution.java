@@ -63,9 +63,22 @@ public class MultivariateNormalDistribution {
 	}
 
 	public void fill(DoubleMatrix2D ans) {
-		// TODO: could speed this up by allocating a thread safe tmpRands?
 		DoubleMatrix1D tmpRands = new DenseDoubleMatrix1D(n);
 
+		int n = means.length;
+		int rows = ans.rows();
+		for (int r = 0; r < rows; r++) {
+			DoubleMatrix1D row = ans.viewRow(r);
+
+			for (int i = 0; i < n; i++)
+				tmpRands.setQuick(i, rand.nextGaussian());
+			L.zMult(tmpRands, row);
+			row.assign(meansVec, Functions.plus);
+		}
+	}
+
+	public void fill(DoubleMatrix2D ans, Random rand) {
+		DoubleMatrix1D tmpRands = new DenseDoubleMatrix1D(n);
 		int n = means.length;
 		int rows = ans.rows();
 		for (int r = 0; r < rows; r++) {

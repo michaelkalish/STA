@@ -4,6 +4,7 @@ import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 import javax.swing.BorderFactory;
 import javax.swing.JButton;
@@ -12,7 +13,7 @@ import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
 import javax.swing.SwingUtilities;
-
+import java.awt.Font;
 import au.edu.adelaide.fxmr.model.SolverListener;
 
 /**
@@ -23,16 +24,26 @@ import au.edu.adelaide.fxmr.model.SolverListener;
  */
 public class StatusFrame extends JFrame implements ActionListener, SolverListener {
 	private static final long serialVersionUID = 1L;
-	private boolean running = true;
+	private AtomicBoolean running;
 	private JButton cancelButton = new JButton("Cancel");
 	private JTextArea statusTextArea = new JTextArea();
 	private final StringBuilder sb = new StringBuilder();
 
 	public StatusFrame() {
-		super("jCMRx " + version());
+		this("jCMRx");
+	}
+
+	public StatusFrame(String title) {
+		this(title, new AtomicBoolean(true));
+	}
+	
+	public StatusFrame(String title, AtomicBoolean running) {
+		super(title + " " + version());
+		this.running = running;
 		cancelButton.addActionListener(this);
 		statusTextArea.setEnabled(false);
 		statusTextArea.setDisabledTextColor(Color.BLACK);
+		statusTextArea.setFont(new Font("Courier New", Font.PLAIN, 12));
 
 		JPanel panel = new JPanel(new BorderLayout(5, 5));
 
@@ -40,7 +51,7 @@ public class StatusFrame extends JFrame implements ActionListener, SolverListene
 
 		setDefaultCloseOperation(DO_NOTHING_ON_CLOSE);
 
-		setSize(540, 370);
+		setSize(540, 420);
 		panel.add(new JScrollPane(statusTextArea), BorderLayout.CENTER);
 		panel.add(cancelButton, BorderLayout.SOUTH);
 
@@ -49,7 +60,7 @@ public class StatusFrame extends JFrame implements ActionListener, SolverListene
 		setVisible(true);
 	}
 
-	private static String version() {
+	public static String version() {
 		String version = StatusFrame.class.getPackage().getImplementationVersion();
 		if (version == null)
 			return "dev";
@@ -58,16 +69,17 @@ public class StatusFrame extends JFrame implements ActionListener, SolverListene
 
 	@Override
 	public void actionPerformed(ActionEvent e) {
-		running = false;
+		running.set(false);
 		statusTextArea.setText("Cancelling...");
 	}
 
-	public void updateStatus(final String status) {
+	public boolean updateStatus(final String status) {
 		SwingUtilities.invokeLater(new Runnable() {
 			public void run() {
 				statusTextArea.setText(status);
 			}
 		});
+		return running.get();
 	}
 
 	@Override
@@ -76,7 +88,8 @@ public class StatusFrame extends JFrame implements ActionListener, SolverListene
 	}
 
 	@Override
-	public boolean updateStatus(double fFloor, double fBar, double upperFloor, int size, int[] nIterThread, int collisions,int fBarReductions, int cyclesAvoided) {
+	public boolean updateStatus(double fFloor, double fBar, double upperFloor, int size, int[] nIterThread, int collisions, int fBarReductions,
+			int cyclesAvoided) {
 		sb.setLength(0);
 		sb.append("fFloor =\t");
 		sb.append(fFloor);
@@ -108,17 +121,24 @@ public class StatusFrame extends JFrame implements ActionListener, SolverListene
 		sb.append(cyclesAvoided);
 
 		sb.append("\n\nMem = \t");
-		sb.append((Runtime.getRuntime().totalMemory() - Runtime.getRuntime().freeMemory())/ (1024.0 * 1024.0));
+		sb.append((Runtime.getRuntime().totalMemory() - Runtime.getRuntime().freeMemory()) / (1024.0 * 1024.0));
 		sb.append("\nMax = \t");
 		sb.append(Runtime.getRuntime().totalMemory() / (1024.0 * 1024.0));
-		
-		
+
 		SwingUtilities.invokeLater(new Runnable() {
 			public void run() {
 				statusTextArea.setText(sb.toString());
 			}
 		});
 
-		return running;
+		return running.get();
+	}
+
+	public boolean isRunning() {
+		return running.get();
+	}
+
+	public void setCancelText(String text) {
+		cancelButton.setText(text);
 	}
 }

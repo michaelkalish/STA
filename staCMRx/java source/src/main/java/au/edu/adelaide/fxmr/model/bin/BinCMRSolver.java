@@ -74,25 +74,25 @@ public class BinCMRSolver {
 				}
 
 				double gFit = current.getG2();
-
 				int[] feas = CMRxSolver.isFeasible3n(xPrimes, infeas, tmpVolumes, tmpZoneNumbers);
 
-				if (gFit < gBar)
+				if (gFit < gBar) {
 					// Solution is better than current best
 					if (feas == null) {
-					// Solution is feasible
-					gBar = gFit;
-					fBar = current.getF();
+						// Solution is feasible
+						gBar = gFit;
+						fBar = current.getF();
 
-					xBar = xPrimes;
-					adjBar = current.getAdjs();
+						xBar = xPrimes;
+						adjBar = current.getAdjs();
 					} else {
-					// Solution not feasible - make it so!
-					int negIndex = feas[0];
-					int posIndex = feas[1];
-					remaining.add(current.split(posIndex, negIndex, 0));
-					remaining.add(current.split(negIndex, posIndex, 1));
+						// Solution not feasible - make it so!
+						int negIndex = feas[0];
+						int posIndex = feas[1];
+						remaining.add(current.split(posIndex, negIndex, 0));
+						remaining.add(current.split(negIndex, posIndex, 1));
 					}
+				}
 			}
 		}
 

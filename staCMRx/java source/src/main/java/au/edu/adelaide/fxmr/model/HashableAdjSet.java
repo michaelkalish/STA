@@ -4,14 +4,11 @@ import java.util.Arrays;
 import java.util.HashSet;
 
 import au.edu.adelaide.fxmr.joptimizer.functions.SimpleLinearConstraint;
+import au.edu.adelaide.fxmr.model.mr.MRProblem;
 
-class HashableAdjSet {
+public class HashableAdjSet {
 	private SimpleLinearConstraint[][] adjs;
 	int hashCode;
-
-	public HashableAdjSet(CMRxTrial current) {
-		this(current.getAdjs());
-	}
 
 	public HashableAdjSet(HashSet<SimpleLinearConstraint>[] adjs) {
 		final int prime = 31;
@@ -24,6 +21,20 @@ class HashableAdjSet {
 			this.adjs[i] = a.toArray(new SimpleLinearConstraint[a.size()]);
 			Arrays.sort(this.adjs[i++]);
 		}
+	}
+
+	public HashableAdjSet(MRProblem[] problems) {
+		final int prime = 31;
+		hashCode = 1;
+
+		adjs = new SimpleLinearConstraint[problems.length][];
+		int i = 0;
+		for (MRProblem p : problems) {
+			HashSet<SimpleLinearConstraint> a = p.getMatIneq();
+			hashCode = prime * hashCode + a.hashCode();
+			adjs[i] = a.toArray(new SimpleLinearConstraint[a.size()]);
+			Arrays.sort(adjs[i++]);
+		}		
 	}
 
 	@Override

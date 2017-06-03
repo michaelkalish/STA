@@ -196,31 +196,28 @@ public class ParCMRxSolver {
 					while (current == null) {
 						synchronized (remaining) {
 							current = grabEnd != -1 && remaining.size() > grabEnd ? remaining.pollLast() : remaining.pollFirst();
-							if (current != null) {
-								waiting.decrementAndGet();
-								break;
-							} else if (waiting.intValue() == nThread || !running) {
-								running = false;
-								return true;
-							}
 						}
-						try {
-							Thread.sleep(1);
-						} catch (InterruptedException e) {
-							// meh
+						if (current != null) {
+							waiting.decrementAndGet();
+							break;
+						} else if (waiting.intValue() == nThread || !running) {
+							running = false;
+							return true;
 						}
+						Thread.yield();
 					}
 
 					fFloor = current.getF();
 					nIterThread[threadNum]++;
+
+					synchronized (remaining) {
+						if (!remaining.isEmpty())
+							upperFloor = remaining.last().getF();
+						else
+							upperFloor = fFloor;// This is the one we just
+						// grabbed!
+					}
 					synchronized (iter) {
-						synchronized (remaining) {
-							if (!remaining.isEmpty())
-								upperFloor = remaining.last().getF();
-							else
-								upperFloor = fFloor;// This is the one we just
-							// grabbed!
-						}
 						iter.add(new CMRIter(fFloor, fBar, upperFloor, remaining.size()));
 					}
 
@@ -293,17 +290,21 @@ public class ParCMRxSolver {
 										}
 
 										if (useful) {
-											synchronized (visited) {
-												if (visited.contains(newTrial))
-													collisions++;
-												else
-													tmpTrials.add(newTrial);
-											}
+											tmpTrials.add(newTrial);
 										}
 									}
 								}
 								synchronized (visited) {
-									visited.addAll(tmpTrials);
+									Iterator<CMRxTrial> iter = tmpTrials.iterator();
+									while (iter.hasNext()) {
+										CMRxTrial t = iter.next();
+										if (visited.contains(t)) {
+											collisions++;
+											iter.remove();
+										} else {
+											visited.add(t);
+										}
+									}
 								}
 								synchronized (remaining) {
 									remaining.addAll(tmpTrials);

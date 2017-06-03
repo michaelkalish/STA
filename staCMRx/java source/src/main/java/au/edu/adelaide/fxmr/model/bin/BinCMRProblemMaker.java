@@ -4,10 +4,16 @@ import java.util.ArrayList;
 
 import au.edu.adelaide.fxmr.data.BinElement;
 import au.edu.adelaide.fxmr.data.BinModel;
+import cern.colt.matrix.DoubleMatrix2D;
+import cern.colt.matrix.impl.DenseDoubleMatrix2D;
 
 public class BinCMRProblemMaker {
 	private ArrayList<Object> rangeSet = new ArrayList<>();
 	private BinModel model;
+	/**
+	 * Optional model
+	 */
+	protected double[][] cmrModel;
 
 	public BinCMRProblemMaker(int nSubj, int nVar) {
 		model = new BinModel(nSubj, nVar);
@@ -15,6 +21,23 @@ public class BinCMRProblemMaker {
 
 	public void setElement(int subj, int var, int[][] values) {
 		model.setElement(new BinElement(values), subj, var);
+	}
+
+	public void setModel(double[][] model) {
+		this.cmrModel = model;
+	}
+
+	/**
+	 * Specific method for R that allows a vector to be set (interpreted as a
+	 * matrix)
+	 * 
+	 * @param model
+	 */
+	public void setModel(double[] model) {
+		int n = model.length;
+		this.cmrModel = new double[n][];
+		for (int i = 0; i < n; i++)
+			this.cmrModel[i] = new double[] { model[i] };
 	}
 
 	/**
@@ -44,8 +67,14 @@ public class BinCMRProblemMaker {
 		int nSubj = model.getnSubj();
 		BinProblem[] problems = new BinProblem[nSubj];
 
-		for (int i = 0; i < nSubj; i++)
+		DoubleMatrix2D cmrModelMatrix = null;
+		if (cmrModel != null)
+			cmrModelMatrix = new DenseDoubleMatrix2D(cmrModel);
+
+		for (int i = 0; i < nSubj; i++) {
 			problems[i] = new BinProblem(model, i, makeRangeSet());
+			problems[i].setCmrModel(cmrModelMatrix);
+		}
 
 		return problems;
 	}

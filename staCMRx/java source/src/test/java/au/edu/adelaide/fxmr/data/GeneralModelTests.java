@@ -2,6 +2,7 @@ package au.edu.adelaide.fxmr.data;
 
 import static org.junit.Assert.*;
 
+import java.util.Arrays;
 import java.util.HashSet;
 
 import org.junit.Test;
@@ -260,8 +261,45 @@ public class GeneralModelTests {
 		}
 
 		CMRxGMFits fits = new CMRxGMFits(5, gm, -1, model, adj, -1, false, false, 0, 0, false);
-
+		
 		assertEquals(1.5771779458404, fits.getDataFit(), 1e-9);
+	}
+
+	@Test
+	public void seedRepeatTest() {
+		GeneralModel gm = new GeneralModel();
+		for (int i = 0; i < delayData.length; i++)
+			gm.addData(delayInitData[i][0], delayInitData[i][1], delayInitData[i][2], delayData[i]);
+
+		DenseDoubleMatrix2D model = new DenseDoubleMatrix2D(4, 1);
+		model.assign(1);
+
+		int nvar = gm.getNDepVar().length;
+
+		@SuppressWarnings("unchecked")
+		HashSet<SimpleLinearConstraint>[] adj = new HashSet[nvar];
+
+		HashSet<SimpleLinearConstraint> a = new HashSet<>();
+		a.add(new SimpleLinearConstraint(0, 1));
+		a.add(new SimpleLinearConstraint(1, 2));
+		a.add(new SimpleLinearConstraint(2, 3));
+		a.add(new SimpleLinearConstraint(4, 5));
+		a.add(new SimpleLinearConstraint(5, 6));
+		a.add(new SimpleLinearConstraint(6, 7));
+		a.add(new SimpleLinearConstraint(4, 0));
+		a.add(new SimpleLinearConstraint(5, 1));
+		a.add(new SimpleLinearConstraint(6, 2));
+		a.add(new SimpleLinearConstraint(7, 3));
+
+		for (int i = 0; i < nvar; i++) {
+			adj[i] = a;
+		}
+
+		CMRxGMFits fits = new CMRxGMFits(1000, gm, -1, model, adj, -1, false, false, 0, 0, false, false, 242343l, false);
+		assertEquals(1.5771779458404, fits.getDataFit(), 1e-9);
+		assertEquals(0.177, fits.getP(), 1e-9);
+		assertEquals(0.23202811288387803, fits.getFits()[1], 1e-9);
+		assertEquals(0.633664696462513, fits.getFits()[10], 1e-9);
 	}
 
 	@Test
@@ -290,11 +328,11 @@ public class GeneralModelTests {
 		model.assign(1);
 
 		long start1 = System.nanoTime();
-		new CMRxGMFits(10, gm, -1, model, null, -1, false, false, 0, 0, false);
+		new CMRxGMFits(20, gm, -1, model, null, -1, false, false, 0, 0, false);
 		long end1 = System.nanoTime();
 
 		long start2 = System.nanoTime();
-		new CMRxGMFits(10, gm, -1, model, null, -1, false, false, 0, 0, true);
+		new CMRxGMFits(20, gm, -1, model, null, -1, false, false, 0, 0, true);
 		long end2 = System.nanoTime();
 
 		assertTrue(end1 - start1 > end2 - start2);

@@ -85,6 +85,15 @@ public class FitsTests {
 	}
 
 	@Test
+	public void fitSeedTest() {
+		CMRxFitsProblem problem = new CMRxFitsProblem(getMeansSK1(), getWeightsSK1(), null, model8, getNSK1(),
+				getCovSK1());
+
+		CMRxFits fit = new CMRxFits(4, problem, -1, 0, false, false, 0, 0, false, false, 123, true);
+		assertEquals(0.25, fit.getP(), 1e-4);
+	}
+
+	@Test
 	public void fitsModel5GMTest() {
 		CMRxFitsGMProblemMaker maker = new CMRxFitsGMProblemMaker();
 		maker.addCell(1, 1,

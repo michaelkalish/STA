@@ -9,8 +9,6 @@ import cern.colt.matrix.impl.DenseDoubleMatrix2D;
 
 /**
  * Allows MATLAB to create CMRxFitsGMProblems
- * 
- * 
  */
 public class CMRxFitsGMProblemMaker extends CMRxProblemMaker {
 	private GeneralModel gm;
@@ -67,13 +65,18 @@ public class CMRxFitsGMProblemMaker extends CMRxProblemMaker {
 		return solve(nSample, proc, cheapP, onlySTAMR, mrTol1, mrTol2, false, false);
 	}
 
-	public Fits solve(int nSample, int proc, boolean cheapP, boolean onlySTAMR, double mrTol1, double mrTol2, boolean approximate){
+	public Fits solve(int nSample, int proc, boolean cheapP, boolean onlySTAMR, double mrTol1, double mrTol2, boolean approximate) {
 		return solve(nSample, proc, cheapP, onlySTAMR, mrTol1, mrTol2, approximate, false);
 	}
-	
-	@SuppressWarnings("unchecked")
+
 	public Fits solve(int nSample, int proc, boolean cheapP, boolean onlySTAMR, double mrTol1, double mrTol2, boolean approximate,
 			boolean reverse) {
+		return solve(nSample, proc, cheapP, onlySTAMR, mrTol1, mrTol2, approximate, reverse, -1, false);
+	}
+
+	@SuppressWarnings("unchecked")
+	public Fits solve(int nSample, int proc, boolean cheapP, boolean onlySTAMR, double mrTol1, double mrTol2, boolean approximate,
+			boolean reverse, long seed, boolean showStatus) {
 		HashSet<SimpleLinearConstraint>[] dMatAs = null;
 		if (matAs.size() > 0) {
 			dMatAs = new HashSet[matAs.size()];
@@ -87,6 +90,6 @@ public class CMRxFitsGMProblemMaker extends CMRxProblemMaker {
 		}
 
 		return new CMRxGMFits(nSample, gm, shrink, new DenseDoubleMatrix2D(model), dMatAs, proc, cheapP, onlySTAMR, mrTol1, mrTol2,
-				approximate, reverse);
+				approximate, reverse, seed,showStatus);
 	}
 }

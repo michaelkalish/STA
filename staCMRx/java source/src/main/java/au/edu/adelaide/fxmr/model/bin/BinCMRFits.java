@@ -36,7 +36,6 @@ public class BinCMRFits {
 		this.nSubj = model.getnSubj();
 		this.notCoupled = notCoupled;
 		this.baseFitDiff = calcFitDiff(problem, notCoupled ? new BinMRSolver() : new BinCMRSolver());
-		
 
 		fits = new double[nSample][];
 
@@ -70,7 +69,7 @@ public class BinCMRFits {
 
 		double[] fitDiff = new double[nSubj];
 
-		if (problemLoc.getRangeSet() != null && problemLoc.getRangeSet().length != 0  && !notCoupled) {
+		if (problemLoc.getRangeSet() != null && problemLoc.getRangeSet().length != 0 && !notCoupled) {
 			MRSolver mrSolver = new MRSolverAJOptimiser();
 			for (int s = 0; s < nSubj; s++) {
 				double g2Val = 0;
