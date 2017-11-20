@@ -308,60 +308,65 @@ public class CMRxSolver {
 	 * Do a depth first search of a greedy feasible solution in order to obtain
 	 * a reasonable estimate of the upper bound.
 	 * 
+	 * 
 	 * @return
 	 */
-	public static CMRxTrial getFeasible5(CMRxProblem problem, MRSolver solver) {
-		int nvar = problem.getNVar();
-		int nvec = problem.getCv().length;
-		TIntHashSet infeasZones = problem.getInfeasZones();
-		int[][] cv = problem.getCv();
-		int ncond = problem.getNCond();
-		DoubleMatrix2D tmpVolumes = new DenseDoubleMatrix2D(ncond, ncond);
-		int[][] tmpZoneNumbers = new int[ncond][ncond];
-
-		double[][] xPrime = problem.getMeans();
-
-		CMRxTrial[] curBests = new CMRxTrial[nvec];
-		for (int i = 0; i < nvec; i++)
-			curBests[i] = new CMRxTrial(solver, problem.getAdj(), nvar, problem.getWeights(), problem.getMeans());
-
-		int[] infeas = isFeasible3n(xPrime, infeasZones, tmpVolumes, tmpZoneNumbers);
-		while (infeas != null) {
-			int negIndex = infeas[0];
-			int posIndex = infeas[1];
-
-			CMRxTrial bestTrial = null;
-
-			for (int ivec = 0; ivec < nvec; ivec++) {
-				for (int ivar = 0; ivar < nvar; ivar++) {
-					if (cv[ivec][ivar] >= 0) {
-						curBests[ivec].addConstraint(ivar, posIndex, negIndex);
-					} else if (cv[ivec][ivar] <= 0) {
-						curBests[ivec].addConstraint(ivar, negIndex, posIndex);
-					}
-				}
-				curBests[ivec].run();
-				if (bestTrial == null || curBests[ivec].getF() < bestTrial.getF())
-					bestTrial = curBests[ivec];
-			}
-
-			if (bestTrial.getxPrime() == null)
-				// Hit circular constraints from every covector
-				return null;
-
-			infeas = isFeasible3n(bestTrial.getxPrime(), infeasZones, tmpVolumes, tmpZoneNumbers);
-			if (infeas == null) {
-				return bestTrial;
-			} else {
-				// Copy adjacency matries to all curBests
-				for (int i = 0; i < nvec; i++)
-					if (curBests[i] != bestTrial)
-						curBests[i].setConstraintsFrom(bestTrial);
-			}
-		}
-		// Something went wrong?!
-		return null;
-	}
+	// public static CMRxTrial getFeasible5(CMRxProblem problem, MRSolver
+	// solver) {
+	// int nvar = problem.getNVar();
+	// int nvec = problem.getCv().length;
+	// TIntHashSet infeasZones = problem.getInfeasZones();
+	// int[][] cv = problem.getCv();
+	// int ncond = problem.getNCond();
+	// DoubleMatrix2D tmpVolumes = new DenseDoubleMatrix2D(ncond, ncond);
+	// int[][] tmpZoneNumbers = new int[ncond][ncond];
+	//
+	// double[][] xPrime = problem.getMeans();
+	//
+	// CMRxTrial[] curBests = new CMRxTrial[nvec];
+	// for (int i = 0; i < nvec; i++)
+	// curBests[i] = new CMRxTrial(solver, problem.getAdj(), nvar,
+	// problem.getWeights(), problem.getMeans());
+	//
+	// int[] infeas = isFeasible3n(xPrime, infeasZones, tmpVolumes,
+	// tmpZoneNumbers);
+	// while (infeas != null) {
+	// int negIndex = infeas[0];
+	// int posIndex = infeas[1];
+	//
+	// CMRxTrial bestTrial = null;
+	//
+	// for (int ivec = 0; ivec < nvec; ivec++) {
+	// for (int ivar = 0; ivar < nvar; ivar++) {
+	// if (cv[ivec][ivar] >= 0) {
+	// curBests[ivec].addConstraint(ivar, posIndex, negIndex);
+	// } else if (cv[ivec][ivar] <= 0) {
+	// curBests[ivec].addConstraint(ivar, negIndex, posIndex);
+	// }
+	// }
+	// curBests[ivec].run();
+	// if (bestTrial == null || curBests[ivec].getF() < bestTrial.getF())
+	// bestTrial = curBests[ivec];
+	// }
+	//
+	// if (bestTrial.getxPrime() == null)
+	// // Hit circular constraints from every covector
+	// return null;
+	//
+	// infeas = isFeasible3n(bestTrial.getxPrime(), infeasZones, tmpVolumes,
+	// tmpZoneNumbers);
+	// if (infeas == null) {
+	// return bestTrial;
+	// } else {
+	// // Copy adjacency matries to all curBests
+	// for (int i = 0; i < nvec; i++)
+	// if (curBests[i] != bestTrial)
+	// curBests[i].setConstraintsFrom(bestTrial);
+	// }
+	// }
+	// // Something went wrong?!
+	// return null;
+	// }
 
 	/**
 	 * Do a depth first search of a greedy feasible solution in order to obtain
@@ -407,17 +412,21 @@ public class CMRxSolver {
 				if (nS > 0) {
 					CMRxTrial newTrial = curBest.split(trialIndex++);
 
+					boolean isNew = false;
+
 					for (int i = 0; i < nS; i++) {
 						int k = tmpCVSet[i];
 						if (covector[k] > 0)
-							newTrial.addConstraint(k, posIndex, negIndex);
+							isNew |= newTrial.addConstraint(k, posIndex, negIndex);
 						else if (covector[k] < 0)
-							newTrial.addConstraint(k, negIndex, posIndex);
+							isNew |= newTrial.addConstraint(k, negIndex, posIndex);
 					}
 
-					newTrial.run();
-					if (newTrial.getxPrime() != null && (newBest == null || newTrial.getF() < newBest.getF()))
-						newBest = newTrial;
+					if (isNew) {
+						newTrial.run();
+						if (newTrial.getxPrime() != null && (newBest == null || newTrial.getF() < newBest.getF()))
+							newBest = newTrial;
+					}
 				}
 			}
 
@@ -482,18 +491,22 @@ public class CMRxSolver {
 				if (nS > 0) {
 					CMRxTrial newTrial = curBest.split(trialIndex++);
 
+					boolean isNew = false;
+
 					for (int i = 0; i < nS; i++) {
 						int k = tmpCVSet[i];
 						if (covector[k] > 0) {
-							newTrial.addConstraint(k, posIndex, negIndex);
+							isNew |= newTrial.addConstraint(k, posIndex, negIndex);
 						} else if (covector[k] < 0) {
-							newTrial.addConstraint(k, negIndex, posIndex);
+							isNew |= newTrial.addConstraint(k, negIndex, posIndex);
 						}
 					}
 
-					newTrial.run(trialCache);
-					if (newTrial.getxPrime() != null && (newBest == null || newTrial.getF() < newBest.getF()))
-						newBest = newTrial;
+					if (isNew) {
+						newTrial.run(trialCache);
+						if (newTrial.getxPrime() != null && (newBest == null || newTrial.getF() < newBest.getF()))
+							newBest = newTrial;
+					}
 				}
 			}
 

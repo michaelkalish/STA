@@ -1,5 +1,6 @@
 package au.edu.adelaide.fxmr.model.bin;
 
+import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.TreeSet;
@@ -252,17 +253,21 @@ public class BinCMRxSolver {
 				if (nS > 0) {
 					BinTrial newTrial = curBest.split(trialIndex++);
 
+					boolean isNew = false;
+
 					for (int i = 0; i < nS; i++) {
 						int k = tmpCVSet[i];
 						if (covector[k] > 0)
-							newTrial.addConstraint(k, posIndex, negIndex);
+							isNew |= newTrial.addConstraint(k, posIndex, negIndex);
 						else if (covector[k] < 0)
-							newTrial.addConstraint(k, negIndex, posIndex);
+							isNew |= newTrial.addConstraint(k, negIndex, posIndex);
 					}
 
-					newTrial.solveMRs(solver);
-					if (newTrial.getxPrime() != null && (newBest == null || newTrial.getF() < newBest.getF()))
-						newBest = newTrial;
+					if (isNew) {
+						newTrial.solveMRs(solver);
+						if (newTrial.getxPrime() != null && (newBest == null || newTrial.getG2() < newBest.getG2()))
+							newBest = newTrial;
+					}
 				}
 			}
 
@@ -274,7 +279,6 @@ public class BinCMRxSolver {
 			curBest = newBest;
 			infeas = CMRxSolver.isFeasible3n(curBest.getxPrime(), infeasZones, tmpVolumes, tmpZoneNumbers);
 		}
-
 		return curBest;
 	}
 

@@ -362,7 +362,7 @@ public class BinTests {
 		// System.out.println(Arrays.toString(fits.getP()));
 	}
 
-	@Test
+	//@Test
 	public void fitsxCancelTest() {
 		BinModel binModel = makeBinModel();
 
