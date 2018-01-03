@@ -72,8 +72,7 @@ public class BinCMRProblemMaker {
 			cmrModelMatrix = new DenseDoubleMatrix2D(cmrModel);
 
 		for (int i = 0; i < nSubj; i++) {
-			problems[i] = new BinProblem(model, i, makeRangeSet());
-			problems[i].setCmrModel(cmrModelMatrix);
+			problems[i] = new BinProblem(model, i, makeRangeSet(), cmrModelMatrix);
 		}
 
 		return problems;
@@ -91,6 +90,8 @@ public class BinCMRProblemMaker {
 	}
 
 	public BinBaseProblem getBaseProblem() {
-		return new BinBaseProblem(model, makeRangeSet());
+		if (cmrModel == null)
+			return new BinBaseProblem(model, makeRangeSet());
+		return new BinBaseProblem(model, makeRangeSet(), new DenseDoubleMatrix2D(cmrModel));
 	}
 }

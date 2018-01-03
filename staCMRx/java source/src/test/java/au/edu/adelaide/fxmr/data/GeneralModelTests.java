@@ -328,11 +328,11 @@ public class GeneralModelTests {
 		model.assign(1);
 
 		long start1 = System.nanoTime();
-		new CMRxGMFits(20, gm, -1, model, null, -1, false, false, 0, 0, false);
+		new CMRxGMFits(50, gm, -1, model, null, -1, false, false, 0, 0, false);
 		long end1 = System.nanoTime();
 
 		long start2 = System.nanoTime();
-		new CMRxGMFits(20, gm, -1, model, null, -1, false, false, 0, 0, true);
+		new CMRxGMFits(50, gm, -1, model, null, -1, false, false, 0, 0, true);
 		long end2 = System.nanoTime();
 
 		assertTrue(end1 - start1 > end2 - start2);

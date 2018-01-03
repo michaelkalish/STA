@@ -12,7 +12,7 @@ public class ParBinCMRxSolver extends BinCMRxSolver {
 		int n = problem.getModel().getnSubj();
 		BinProblem[] problems = new BinProblem[n];
 		for (int i = 0; i < n; i++)
-			problems[i] = new BinProblem(problem.getModel(), i, problem.getRangeSet());
+			problems[i] = new BinProblem(problem.getModel(), i, problem.getRangeSet(), problem.getCmrModel());
 		return solve(problems, proc);
 	}
 

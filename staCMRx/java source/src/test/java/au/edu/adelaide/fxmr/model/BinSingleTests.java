@@ -63,11 +63,30 @@ public class BinSingleTests {
 		DoubleMatrix2D cmrModel = new DenseDoubleMatrix2D(new double[][] { { 1 }, { 1 }, { 1 }, { 1 } });
 		BinBaseProblem p = new BinBaseProblem(binModel, null, cmrModel);
 
-		int nSample = 10000;
+		int nSample = 10;
 
 		BinCMRxFits fits = new BinCMRxFits(nSample, p, -1, true, true);
 		// Assuming we dont cancel...
 		assertTrue(fits.getFits().length == nSample);
+	}
+
+	/**
+	 * Bug that john found where the cmrModel wasn't being passed through!
+	 */
+	@Test
+	public void fitsxCMRModel() {
+		BinModel binModel = makeBinModel();
+		int nSample = 1;
+
+		DoubleMatrix2D cmrModel2 = new DenseDoubleMatrix2D(new double[][] { { 1, 0 }, { 0, 1 }, { 1, 0 }, { 0, 1 } });
+		BinBaseProblem p2 = new BinBaseProblem(binModel, null, cmrModel2);
+		BinCMRxFits fits2 = new BinCMRxFits(nSample, p2, -1, true, false);
+		
+		DoubleMatrix2D cmrModel1 = new DenseDoubleMatrix2D(new double[][] { { 1 }, { 1 }, { 1 }, { 1 } });
+		BinBaseProblem p1 = new BinBaseProblem(binModel, null, cmrModel1);
+		BinCMRxFits fits1 = new BinCMRxFits(nSample, p1, -1, true, false);
+		
+		assertTrue(Math.abs(fits1.getBaseFitDiff()[0]- fits2.getBaseFitDiff()[0]) > 1);
 	}
 
 	private BinModel makeBinModel() {

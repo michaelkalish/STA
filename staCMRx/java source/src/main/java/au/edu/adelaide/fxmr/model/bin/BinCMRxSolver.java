@@ -28,7 +28,7 @@ public class BinCMRxSolver {
 		int n = problem.getModel().getnSubj();
 		BinSolution[] solutions = new BinSolution[n];
 		for (int i = 0; i < n; i++)
-			solutions[i] = solve(new BinProblem(problem.getModel(), i, problem.getRangeSet()), running);
+			solutions[i] = solve(new BinProblem(problem.getModel(), i, problem.getRangeSet(), problem.getCmrModel()), running);
 
 		return solutions;
 	}
@@ -37,7 +37,7 @@ public class BinCMRxSolver {
 		int n = problem.getModel().getnSubj();
 		BinSolution[] solutions = new BinSolution[n];
 		for (int i = 0; i < n; i++)
-			solutions[i] = solve(new BinProblem(problem.getModel(), i, problem.getRangeSet()));
+			solutions[i] = solve(new BinProblem(problem.getModel(), i, problem.getRangeSet(), problem.getCmrModel()));
 
 		return solutions;
 	}
