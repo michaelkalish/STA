@@ -1,5 +1,6 @@
 package au.edu.adelaide.fxmr.model.bin;
 
+import au.edu.adelaide.fxmr.data.BinElement;
 import au.edu.adelaide.fxmr.data.BinModel;
 import au.edu.adelaide.fxmr.om.OMUtil;
 import cern.colt.matrix.DoubleMatrix2D;
@@ -106,5 +107,58 @@ public class BinBaseProblem {
 		this.cmrModel = cmrModel;
 		this.cv = null;
 		this.infeasZones = null;
+	}
+
+	public String toString() {
+		StringBuilder sb = new StringBuilder();
+
+		
+		for (BinElement[] d : model.getData()) {
+			sb.append("{");
+			for (BinElement d2 : d) {
+				sb.append("{");
+				int[] h = d2.getHits();
+				int[] m = d2.getMisses();
+				int n = h.length;
+				for (int i = 0; i < n; i++) {
+					sb.append("{");
+					sb.append(h[i]);
+					sb.append(",");
+					sb.append(m[i]);
+					sb.append("},");
+				}
+				sb.append("},");
+			}
+			
+		}
+		sb.append("}");
+		return sb.toString();
+	}
+	
+	
+	public String toMatlabString(){
+		StringBuilder sb = new StringBuilder();
+
+		
+		for (BinElement[] d : model.getData()) {
+			sb.append("{");
+			for (BinElement d2 : d) {
+				sb.append("[");
+				int[] h = d2.getHits();
+				int[] m = d2.getMisses();
+				int n = h.length;
+				for (int i = 0; i < n; i++) {
+					sb.append("[");
+					sb.append(h[i]);
+					sb.append(",");
+					sb.append(m[i]);
+					sb.append("];");
+				}
+				sb.append("],");
+			}
+			
+		}
+		sb.append("}");
+		return sb.toString();
 	}
 }

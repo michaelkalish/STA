@@ -95,6 +95,8 @@ public class BinCMRxSolver {
 				return new BinSolution(fBar, gBar, xBar, iter, (double) (System.nanoTime() - start) / 1_000_000_000, adjBar,
 						mrSolver.getCalls());
 			}
+		} else if (onlyFeas) {
+			return null;
 		}
 
 		BinVisitedSet visited = new BinVisitedSet();
@@ -224,6 +226,7 @@ public class BinCMRxSolver {
 		int nvar = model.getnVar();
 		TIntHashSet infeasZones = problem.getInfeasZones();
 		int[][] cv = problem.getCv();
+
 		BinElement[] data = model.getData()[problem.getSubjectIndex()];
 		int[] tmpCVSet = new int[nvar];
 		int trialIndex = 0;
@@ -232,16 +235,21 @@ public class BinCMRxSolver {
 		curBest.solveMRs(solver);
 		double[][] xPrime = curBest.getxPrime();
 		int[] infeas = CMRxSolver.isFeasible3n(xPrime, infeasZones, tmpVolumes, tmpZoneNumbers);
+
 		while (infeas != null) {
 			int negIndex = infeas[0];
 			int posIndex = infeas[1];
-
 			int zone = infeas[2];
 			int[] signVector = zDecodeCache.get(zone);
 			if (signVector == null) {
 				signVector = OMUtil.zDecode(zone, nvar);
 				zDecodeCache.put(zone, signVector);
 			}
+
+			// System.out.println(Arrays.toString(signVector));
+			// for (double[] xp : curBest.getxPrime()){
+			// System.out.println("\t" + xp[posIndex] + ",\t"+xp[negIndex]);
+			// }
 
 			BinTrial newBest = null;
 			for (int[] covector : cv) {
@@ -257,21 +265,31 @@ public class BinCMRxSolver {
 
 					for (int i = 0; i < nS; i++) {
 						int k = tmpCVSet[i];
-						if (covector[k] > 0)
+						if (covector[k] > 0) {
 							isNew |= newTrial.addConstraint(k, posIndex, negIndex);
-						else if (covector[k] < 0)
+						} else if (covector[k] < 0) {
 							isNew |= newTrial.addConstraint(k, negIndex, posIndex);
+						}
 					}
 
 					if (isNew) {
-						newTrial.solveMRs(solver);
-						if (newTrial.getxPrime() != null && (newBest == null || newTrial.getG2() < newBest.getG2()))
+						double[][] newXPrimes = newTrial.solveMRs(solver);
+
+						// System.out.println(iter + ", " + newTrial.check());
+						// for (double[] xp : newTrial.getxPrime()){
+						// System.out.println("\t" + xp[posIndex] +
+						// ",\t"+xp[negIndex]);
+						// }
+
+						if (newXPrimes != null && (newBest == null || newTrial.getG2() < newBest.getG2()))
 							newBest = newTrial;
 					}
 				}
 			}
 
 			if (newBest == null) {
+				// System.out.println("FAIL " + negIndex + ", " + posIndex);
+
 				// This would mean we failed very early on...
 				return null;
 			}

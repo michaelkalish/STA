@@ -27,3 +27,6 @@ disp(['STACMR linked to java library ', filename])
 javaclasspath (which(filename));
 eval(['cd ''', currdir,'''']); % return to working directory
 
+%Also add utility functions to the path
+addpath('Utility functions')
+addpath('java')

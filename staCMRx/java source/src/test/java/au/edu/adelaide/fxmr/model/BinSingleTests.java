@@ -81,12 +81,12 @@ public class BinSingleTests {
 		DoubleMatrix2D cmrModel2 = new DenseDoubleMatrix2D(new double[][] { { 1, 0 }, { 0, 1 }, { 1, 0 }, { 0, 1 } });
 		BinBaseProblem p2 = new BinBaseProblem(binModel, null, cmrModel2);
 		BinCMRxFits fits2 = new BinCMRxFits(nSample, p2, -1, true, false);
-		
+
 		DoubleMatrix2D cmrModel1 = new DenseDoubleMatrix2D(new double[][] { { 1 }, { 1 }, { 1 }, { 1 } });
 		BinBaseProblem p1 = new BinBaseProblem(binModel, null, cmrModel1);
 		BinCMRxFits fits1 = new BinCMRxFits(nSample, p1, -1, true, false);
-		
-		assertTrue(Math.abs(fits1.getBaseFitDiff()[0]- fits2.getBaseFitDiff()[0]) > 1);
+
+		assertTrue(Math.abs(fits1.getBaseFitDiff()[0] - fits2.getBaseFitDiff()[0]) > 1);
 	}
 
 	private BinModel makeBinModel() {

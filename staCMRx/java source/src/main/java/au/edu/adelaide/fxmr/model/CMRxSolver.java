@@ -436,6 +436,7 @@ public class CMRxSolver {
 			}
 
 			curBest = newBest;
+			
 			infeas = isFeasible3n(curBest.getxPrime(), infeasZones, tmpVolumes, tmpZoneNumbers);
 		}
 

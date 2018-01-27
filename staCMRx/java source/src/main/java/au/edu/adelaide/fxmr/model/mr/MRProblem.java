@@ -176,9 +176,8 @@ public class MRProblem implements Cloneable {
 
 	public boolean addConstraint(int posIndex, int negIndex, double[] previousSolution) {
 		for (SimpleLinearConstraint con : matIneq) {
-			if (con.getNegIndex() == negIndex && con.getPosIndex() == posIndex || con.getNegIndex() == posIndex && con.getPosIndex() == negIndex)
-				// Dont allow the same constraint to be added OR the reverse
-				// constraint to be added!
+			if (con.getNegIndex() == negIndex && con.getPosIndex() == posIndex)// || con.getNegIndex() == posIndex && con.getPosIndex() == negIndex)
+				// Dont allow the same constraint to be added
 				return false;
 		}
 

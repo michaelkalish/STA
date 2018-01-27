@@ -11,7 +11,6 @@ import au.edu.adelaide.fxmr.model.mr.MRProblem;
 import au.edu.adelaide.fxmr.model.mr.MRSolver;
 import au.edu.adelaide.fxmr.model.mr.MRSolverAJOptimiser;
 import au.edu.adelaide.fxmr.model.ui.StatusFrame;
-import cern.colt.Arrays;
 
 public class BinCMRxFits {
 	private BinBaseProblem problem;
@@ -148,15 +147,21 @@ public class BinCMRxFits {
 			if (!running.get())
 				return;
 
+			//TODO: BinBaseProblem pr1 = new BinBaseProblem(r1, problem.getRangeSet(), problem.getCmrModel());
 			BinBaseProblem pr1 = new BinBaseProblem(r1, problem.getRangeSet());
+			
+			//System.out.println("int[][][] pr1 = " + pr1.toString());
+			
 			BinSolution[] solnR1 = solver.solve(pr1, running);
 
 			if (!running.get())
 				return;
 
 			BinModel r2 = model.resample(solnR1);
+			//TODO: BinBaseProblem pr2 = new BinBaseProblem(r2, problem.getRangeSet(), problem.getCmrModel());
 			BinBaseProblem pr2 = new BinBaseProblem(r2, problem.getRangeSet());
-
+			
+			//System.out.println("int[][][] pr2 = " + pr2.toString());
 			if (!running.get())
 				return;
 
