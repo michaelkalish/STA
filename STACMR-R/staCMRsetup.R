@@ -24,5 +24,5 @@ source ('jCMRBN.R')
 source ('jCMRfitsx.R')
 if(require("magic")==F){install.packages ("magic"); library(magic)} 
 if(require("rJava")==F){install.packages ("rJava"); library(rJava)}
-.jinit (classpath="fxMR-0.3.36.jar") # initialize java VM
+.jinit (classpath="fxMR-0.3.39.jar") # initialize java VM
 setwd ('../')
