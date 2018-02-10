@@ -16,12 +16,14 @@ source ('shrinkDiag.R')
 source ('gen2listBN.R')
 source ('staSTATSBN.R')
 source ('binSTATS.R')
+source ('BNframe2list.R')
 setwd ('../')
 setwd ('java')
 source ('jMR.R')
 source ('jCMRx.R')
 source ('jCMRBN.R')
 source ('jCMRfitsx.R')
+source ('jCMRBNfitsx.R')
 if(require("magic")==F){install.packages ("magic"); library(magic)} 
 if(require("rJava")==F){install.packages ("rJava"); library(rJava)}
 .jinit (classpath="fxMR-0.3.39.jar") # initialize java VM

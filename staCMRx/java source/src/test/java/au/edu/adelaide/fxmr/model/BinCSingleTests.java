@@ -54,13 +54,13 @@ public class BinCSingleTests {
 			}
 	};
 
-	// @Test
+	@Test
 	public void fitsxFINDEvilDataTest() {
 		BinModel binModel = makeBinModel(data);
 		DoubleMatrix2D cmrModel = new DenseDoubleMatrix2D(m22);
 		BinBaseProblem p = new BinBaseProblem(binModel, null, cmrModel);
 		int nSample = 5000;
-		new BinCMRxFits(nSample, p, 1, true, true);
+		new BinCMRxFits(nSample, p, -1, true, true);
 	}
 
 	@Test

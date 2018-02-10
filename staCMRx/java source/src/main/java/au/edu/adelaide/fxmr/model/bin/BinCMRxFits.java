@@ -147,8 +147,8 @@ public class BinCMRxFits {
 			if (!running.get())
 				return;
 
-			//TODO: BinBaseProblem pr1 = new BinBaseProblem(r1, problem.getRangeSet(), problem.getCmrModel());
-			BinBaseProblem pr1 = new BinBaseProblem(r1, problem.getRangeSet());
+			BinBaseProblem pr1 = new BinBaseProblem(r1, problem.getRangeSet(), problem.getCmrModel());
+			//OLD code: BinBaseProblem pr1 = new BinBaseProblem(r1, problem.getRangeSet());
 			
 			//System.out.println("int[][][] pr1 = " + pr1.toString());
 			
@@ -158,8 +158,8 @@ public class BinCMRxFits {
 				return;
 
 			BinModel r2 = model.resample(solnR1);
-			//TODO: BinBaseProblem pr2 = new BinBaseProblem(r2, problem.getRangeSet(), problem.getCmrModel());
-			BinBaseProblem pr2 = new BinBaseProblem(r2, problem.getRangeSet());
+			BinBaseProblem pr2 = new BinBaseProblem(r2, problem.getRangeSet(), problem.getCmrModel());
+			//OLD code: BinBaseProblem pr2 = new BinBaseProblem(r2, problem.getRangeSet());
 			
 			//System.out.println("int[][][] pr2 = " + pr2.toString());
 			if (!running.get())
