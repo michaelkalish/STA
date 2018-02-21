@@ -1,4 +1,4 @@
-jCMRxBNfits <- function(nsample, data, E=list(), model=NULL, proc=-1, approximate=FALSE) {
+jMRBNfits <- function(nsample, data, E=list(),proc=-1) {
   d <- data
   
   if (with(d, exists('ngroup'))) {
@@ -8,8 +8,6 @@ jCMRxBNfits <- function(nsample, data, E=list(), model=NULL, proc=-1, approximat
     nSubj = length(d)
     nVar = length(d[[1]])
   }
-  
-  if (missing(model) | is.null(model)) {model <- matrix(1, nVar, 1)}
   
   problemMaker <- new(J("au.edu.adelaide.fxmr.model.bin.BinCMRProblemMaker"), nSubj, nVar)
   
@@ -25,9 +23,6 @@ jCMRxBNfits <- function(nsample, data, E=list(), model=NULL, proc=-1, approximat
     for (v in 1:nVar){
       for (s in 1:nSubj){
         df = as.data.frame(d[[s]][[v]], nrow=2)
-        print(s)
-        print(v)
-        print(df)
         problemMaker$setElement(as.integer(s-1), as.integer(v-1), as.integer(unlist(df)))
       }
     }
@@ -41,9 +36,8 @@ jCMRxBNfits <- function(nsample, data, E=list(), model=NULL, proc=-1, approximat
   }
   
   problem <- problemMaker$getBaseProblem()
-  print
-  fObj <- new(J("au.edu.adelaide.fxmr.model.bin.BinCMRxFits"),as.integer(nsample), problem, as.integer(proc),approximate,FALSE)
-
+  fObj <- new(J("au.edu.adelaide.fxmr.model.bin.BinCMRFits"),as.integer(nsample), problem, as.integer(proc),TRUE)
+  
   p <- fObj$getP()
   datafit <- fObj$getBaseFitDiff()
   fits <- t(.jevalArray(fObj$getFits(),simplify=T))

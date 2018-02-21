@@ -17,6 +17,8 @@ staMRBN = function (data=list(), partial=list()) {
   if (missing(partial) | is.null(partial)) {partial = list()}
   if (is.matrix(partial)) {partial = adj2list(partial)} # convert adjacency matrix to list
   
+  if (is(data,"data.frame")) {data = gen2listBN(data)} # convert data frame to list of lists
+
   y = binSTATS(data) # get summary stats
   
   x = vector('list', y$ngroup); f = matrix(0, y$ngroup, y$nvar); g = f
@@ -39,7 +41,9 @@ staMRBN = function (data=list(), partial=list()) {
     }
     x[[igroup]] = temp
   }
-  return(list(x=x, fval=rowSums(f), g.squared=rowSums(g)))
+  f = as.matrix(rowSums(f))
+  g = as.matrix(rowSums(g))
+  return(list(x=x, fval=f, g.squared=g))
 }
 
 mleBN = function (x, count) {

@@ -78,7 +78,7 @@ jCMRfitsx <- function(nsample, y, model, E=list(), shrink=-1, proc=-1, cheapP=FA
           problemMaker$addCell(as.integer(iVar),as.integer(group),.jarray(as.matrix(y[[iVar]][[group]]), dispatch = T))
         }
       }
-      print(problemMaker)
+ #     print(problemMaker)
       
       sol <- problemMaker$solve(as.integer(nsample),as.integer(proc),as.logical(cheapP),FALSE,as.double(mrTol),as.double(mrTol*1000),as.logical(approximate),FALSE,.jlong(seed),FALSE);
     }

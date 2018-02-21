@@ -1,4 +1,4 @@
-staCMR <- function (data, partial = list(), shrink=-1) {
+staCMR <- function (data, partial = list(), shrink=-1, approx=F) {
   # function [x, f, shrinkage] = staCMR (data, model, partial, shrink)
   # wrapper function for staCMRx
   # Multidimensional CMR
@@ -19,9 +19,8 @@ staCMR <- function (data, partial = list(), shrink=-1) {
   tol <- 10e-5
   if (missing(partial)) {partial = list()}
   if (missing(shrink)) {shrink = -1}
-  tolerance = 0; proc = -1; approx = 0
   
-  output = staCMRx (data, NULL, partial, shrink)
+  output = staCMRx (data, model=NULL, E=partial, shrink=shrink, tolerance=0, proc=-1, approx=approx)
   
   return (output)
 }
