@@ -1,30 +1,44 @@
+# staCMRsetup 
+# sources STACMR functions, loads required packages, and links to java runtime library
+# execute this program before doing anything else
 source ('staSTATS.R')
+source ('staPLOT.R')
 source ('staMR.R')
-# source ('staMRFIT.R')
+source ('staMRFIT.R')
 source ('staCMR.R')
 source ('staCMRFIT.R')
 source ('staMRBN.R')
-# source ('staMRFITBN.R')
+#source ('staMRFITBN.R')
 source ('staCMRBN.R')
-# source ('staCMRFITBN.R')
-setwd ('Utility functions')
-source ('staCMRx.R')
-source ('gen2list.R')
-source ('list2adj.R')
-source ('adj2list.R')
-source ('shrinkDiag.R')
-source ('gen2listBN.R')
-source ('staSTATSBN.R')
-source ('binSTATS.R')
-source ('BNframe2list.R')
-setwd ('../')
-setwd ('java')
-source ('jMR.R')
-source ('jCMRx.R')
-source ('jCMRBN.R')
-source ('jCMRfitsx.R')
-source ('jCMRBNfitsx.R')
+#source ('staCMRFITBN.R')
+
+source ('Utility functions/staCMRx.R')
+source ('Utility functions/gen2list.R')
+source ('Utility functions/list2adj.R')
+source ('Utility functions/adj2list.R')
+source ('Utility functions/shrinkDiag.R')
+source ('Utility functions/gen2listBN.R')
+source ('Utility functions/staSTATSBN.R')
+source ('Utility functions/BNframe2list.R')
+source ('Utility functions/binSTATS.R')
+source ('Utility functions/tiesort.R')
+
+source ('java/jMR.R')
+source ('java/jMRfits.R')
+source ('java/jMRBNfits.R')
+source ('java/jCMRxBNfits.R')
+source ('java/jCMRx.R')
+source ('java/jCMRBN.R')
+source ('java/jCMRfitsx.R')
+source ('java/jCMRBN.R')
 if(require("magic")==F){install.packages ("magic"); library(magic)} 
+if(require("ggplot2")==F){install.packages ("ggplot2"); library (ggplot2)}
+if(require("RColorBrewer")==F){install.packages ("RColorBrewer"); library(RColorBrewer)}
 if(require("rJava")==F){install.packages ("rJava"); library(rJava)}
-.jinit (classpath="fxMR-0.3.39.jar") # initialize java VM
-setwd ('../')
+j = list.files(path='java/',pattern = ".jar$");
+if (length(j)==0) {print("Error: Java runtime library not found")
+  } else {
+  j=sort(j,decreasing=T); vm=paste0('java/',j[1])
+  .jinit (classpath=vm) # initialize java VM
+  print(paste('STACMR linked to java library',j[1]))
+}
