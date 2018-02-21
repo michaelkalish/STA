@@ -28,7 +28,7 @@ staCMRFITBN <- function (data=NULL, partial = list(), nsample=1, model=NULL, pro
   
   nvar =length(y)
   model = NULL
-  if (missing(model) | is.null(model)) {model = matrix(1,nvar,1)} # sta default model
+ # if (missing(model) | is.null(model)) {model = matrix(1,nvar,1)} # sta default model
   
   if (!is.list(partial)) {partial = adj2list(partial)} # convert from adjacency matrix to list
   
