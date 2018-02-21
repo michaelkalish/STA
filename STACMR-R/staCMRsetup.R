@@ -1,6 +1,10 @@
 # staCMRsetup 
 # sources STACMR functions, loads required packages, and links to java runtime library
 # execute this program before doing anything else
+bookinfo = 'Dunn, J. C. & Kalish, M. L. (2018). State-Trace Analysis. Springer.'
+cat ('STACMR program library Version 21.02.2018\n')
+cat ('Utility programs for use with the book:\n')
+cat (paste0(bookinfo,'\n\n'))
 source ('staSTATS.R')
 source ('staPLOT.R')
 source ('staMR.R')
@@ -41,5 +45,5 @@ if (length(j)==0) {print("Error: Java runtime library not found")
   } else {
   j=sort(j,decreasing=T); vm=paste0('java/',j[1])
   .jinit (classpath=vm) # initialize java VM
-  print(paste('STACMR linked to java library',j[1]))
+  cat(paste('STACMR linked to java library',j[1]),'\n')
 }
