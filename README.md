@@ -9,5 +9,5 @@ There are Matlab and R versions of the functions, both of which rely on a Java J
 The MATLAB functions are in *STACMR-matlab*
 
 # R
-The R functions are in *STACMR-r*
+The R functions are in *STACMR-R*
 
