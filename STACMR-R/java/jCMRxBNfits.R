@@ -14,23 +14,19 @@ jCMRxBNfits <- function(nsample, data, E=list(), model=NULL, proc=-1, approximat
   problemMaker <- new(J("au.edu.adelaide.fxmr.model.bin.BinCMRProblemMaker"), nSubj, nVar)
   problemMaker$setModel(.jarray(model))
   
-  if (with(d, exists('ngroup'))) {
-    for (v in 1:nVar){
-      for (s in 1:nSubj){
-        #Minus 1 to zero index
-        df = as.data.frame(d[[s]][[v]]$count, nrow=2)
-        problemMaker$setElement(as.integer(s-1), as.integer(v-1), as.integer(unlist(df)))
+  for (v in 1:nVar){
+    for (s in 1:nSubj){
+      #Minus 1 to zero index
+      dcur = d[[s]][[v]]
+      if (with(dcur, exists('count'))) {
+        df = as.data.frame(dcur$count, nrow=2)
+      }else{
+        df = as.data.frame(dcur, nrow=2)
       }
-    }
-  } else {
-    for (v in 1:nVar){
-      for (s in 1:nSubj){
-        df = as.data.frame(d[[s]][[v]], nrow=2)
-        problemMaker$setElement(as.integer(s-1), as.integer(v-1), as.integer(unlist(df)))
-      }
+      problemMaker$setElement(as.integer(s-1), as.integer(v-1), as.integer(unlist(df)))
     }
   }
-  
+
   if (!missing("E") && is.list(E) && length(E) > 0) {
     #3d list, different constrains for each variable
     for(e in E){
