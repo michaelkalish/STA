@@ -1,4 +1,4 @@
-jCMRBN <- function(data=list(), E=list()) {
+jCMRBN <- function(data=list(), E=list(), model=NULL, approximate=FALSE) {
   d <- data
   
   if (with(d, exists('ngroup'))) {
@@ -9,14 +9,16 @@ jCMRBN <- function(data=list(), E=list()) {
     nVar = length(d[[1]])
   }
   
+  if (missing(model) | is.null(model)) {model <- matrix(1, nVar, 1)}
+  
   problemMaker <- new(J("au.edu.adelaide.fxmr.model.bin.BinCMRProblemMaker"), nSubj, nVar)
-
+  problemMaker$setModel(.jarray(model));
+  
   if (with(d, exists('ngroup'))) {
     for (v in 1:nVar){
       for (s in 1:nSubj){
         #Minus 1 to zero index
-        df = as.data.frame(d[[s]][[v]], nrow=2)
-        print(unlist(df))
+        df = as.data.frame(d[[s]][[v]]$count, nrow=2)
         problemMaker$setElement(as.integer(s-1), as.integer(v-1), as.integer(unlist(df)))
       }
     }
@@ -32,19 +34,21 @@ jCMRBN <- function(data=list(), E=list()) {
   if (!missing("E") && is.list(E) && length(E) > 0) {
     #3d list, different constrains for each variable
     for(e in E){
-      problemMaker$addRangeSet(as.integer(e))
+      problemMaker$addRangeSet(.jarray(as.integer(e)))
     }
   }
   
-  solver <- new(J("au.edu.adelaide.fxmr.model.bin.BinCMRSolver"))
+  solver <- new(J("au.edu.adelaide.fxmr.model.bin.BinCMRxSolver"))
+  solver$setOnlyFeas(as.logical(approximate));
   ps <- problemMaker$getProblems()
-  solutions <- solver$solve(problemMaker$getProblems())
+  solutions <- solver$solve(ps)
   
   x <- vector("list", nSubj)
   f <- matrix(0,nSubj,1)
   g2 <- matrix(0,nSubj,1)
   iter <- vector("list", nSubj)
   i <- 1
+
   for(s in .jevalArray(solutions)){
     x[[i]] = t(.jevalArray(s$getXStar(),simplify = T))
     f[i] = s$getFStar()

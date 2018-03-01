@@ -13,12 +13,9 @@ source ('staCMR.R')
 source ('staCMRFIT.R')
 source ('staPLOTBN.R')
 source ('staMRBN.R')
-<<<<<<< HEAD
-source ('staCMRFITBN.R')
-=======
-source ('staMRFITBN.R')
->>>>>>> branch 'master' of ssh://git@github.com/michaelkalish/STA
 source ('staCMRBN.R')
+source ('staCMRFITBN.R')
+source ('staMRFITBN.R')
 source ('staCMRFITBN.R')
 
 source ('Utility functions/staCMRx.R')

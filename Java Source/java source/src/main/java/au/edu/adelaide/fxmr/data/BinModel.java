@@ -1,6 +1,7 @@
 package au.edu.adelaide.fxmr.data;
 
 import au.edu.adelaide.fxmr.model.bin.BinSolution;
+import cern.jet.random.engine.RandomEngine;
 
 /**
  * Stores a binomial model
@@ -41,19 +42,19 @@ public class BinModel {
 		return nSubj;
 	}
 
-	public BinModel resample() {
+	public BinModel resample(RandomEngine binRand) {
 		BinModel newModel = new BinModel(nSubj, nVar);
 		for (int s = 0; s < nSubj; s++)
 			for (int v = 0; v < nVar; v++)
-				newModel.data[s][v] = data[s][v].resample();
+				newModel.data[s][v] = data[s][v].resample(binRand);
 		return newModel;
 	}
 
-	public BinModel resample(BinSolution[] meanXBases) {
+	public BinModel resample(BinSolution[] meanXBases, RandomEngine binRand) {
 		BinModel newModel = new BinModel(nSubj, nVar);
 		for (int s = 0; s < nSubj; s++)
 			for (int v = 0; v < nVar; v++)
-				newModel.data[s][v] = data[s][v].resample(meanXBases[s].getXStar(v));
+				newModel.data[s][v] = data[s][v].resample(meanXBases[s].getXStar(v), binRand);
 		return newModel;
 	}
 }

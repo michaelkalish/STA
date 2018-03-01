@@ -30,6 +30,7 @@ nvar = size(y,2);
 model = ones(nvar,1);
 approximate = 0;
 showStatus = 0;
+ranseed = -1;
 
 % set arguments if specified
 for i = 1 : 2 : length(varargin)-1
@@ -46,6 +47,8 @@ for i = 1 : 2 : length(varargin)-1
             approximate = value; % approximate solution if true
         case {'showstatus','show','s'}
             showStatus = value; % Luke's update window
+        case {'ranseed','ran','r'}
+            ranseed = value; % random number seed
     end
 end
 

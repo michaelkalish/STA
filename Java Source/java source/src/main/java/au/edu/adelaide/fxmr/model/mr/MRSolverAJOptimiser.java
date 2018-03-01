@@ -2,12 +2,12 @@ package au.edu.adelaide.fxmr.model.mr;
 
 import java.util.HashSet;
 
+import au.edu.adelaide.fxmr.eqoptimiser.EQSolver;
 import au.edu.adelaide.fxmr.joptimizer.functions.QuadraticMultivariateRealFunction;
 import au.edu.adelaide.fxmr.joptimizer.functions.SimpleLinearConstraint;
 import au.edu.adelaide.fxmr.joptimizer.optimizers.OptimizationRequest;
 import au.edu.adelaide.fxmr.joptimizer.optimizers.OptimizationResponse;
 import au.edu.adelaide.fxmr.joptimizer.optimizers.PrimalDualMethod;
-import cern.colt.Arrays;
 import cern.colt.matrix.DoubleMatrix1D;
 import cern.colt.matrix.DoubleMatrix2D;
 import cern.colt.matrix.impl.DenseDoubleMatrix1D;
@@ -30,11 +30,11 @@ public class MRSolverAJOptimiser extends MRSolver {
 	private int free = 0;
 
 	private boolean allowCyclicProblems = true;
-	
-	//private static double maxTime = 0;
-	
+
+	// private static double maxTime = 0;
 
 	public MRSolution solve(MRProblem p) {// throws CatastrophicMRFailure {
+		long start = System.nanoTime();
 		if (p.constraintsAlreadySatisfied()) {
 			// Trivial case
 			return new MRSolution(p, p.getY(), 0, 0);
@@ -47,7 +47,6 @@ public class MRSolverAJOptimiser extends MRSolver {
 
 		if (!eq.isEmpty() && !allowCyclicProblems)
 			return null;
-
 		// Only non-trivial problems count as a "call"
 		calls++;
 
@@ -55,11 +54,12 @@ public class MRSolverAJOptimiser extends MRSolver {
 		// will probably fail!
 		DoubleMatrix2D weights = p.getWeights();
 
-		// inequalities
-		int nIneq = ineq.size();
-		SimpleLinearConstraint[] inequalities = new SimpleLinearConstraint[nIneq];
-		ineq.toArray(inequalities);
+		// Create the objective function
+		DoubleMatrix1D q = new DenseDoubleMatrix1D(n);
+		weights.zMult(new DenseDoubleMatrix1D(p.getY()), q, -1, 0, true);
 
+		QuadraticMultivariateRealFunction objectiveFunction = new QuadraticMultivariateRealFunction(
+				weights.toArray(), q.toArray(), 0);
 		// Equalities
 		SimpleLinearConstraint[] eqMat = null;
 		if (!eq.isEmpty()) {
@@ -67,12 +67,16 @@ public class MRSolverAJOptimiser extends MRSolver {
 			eq.toArray(eqMat);
 		}
 
-		// Create the objective function
-		DoubleMatrix1D q = new DenseDoubleMatrix1D(n);
-		weights.zMult(new DenseDoubleMatrix1D(p.getY()), q, -1, 0, true);
+		if (ineq.isEmpty() && !eq.isEmpty()) {
+			// PrimalDual can't solve this - find a solution. This is very rare
+			EQSolver eqSolver = new EQSolver(objectiveFunction, eqMat);
+			return new MRSolution(p, eqSolver.solve(), (double) (System.nanoTime() - start) / 1_000_000_000.0, eqSolver.getIterations());
+		}
 
-		QuadraticMultivariateRealFunction objectiveFunction = new QuadraticMultivariateRealFunction(
-				weights.toArray(), q.toArray(), 0);
+		// inequalities
+		int nIneq = ineq.size();
+		SimpleLinearConstraint[] inequalities = new SimpleLinearConstraint[nIneq];
+		ineq.toArray(inequalities);
 
 		// optimization problem
 		OptimizationRequest or = new OptimizationRequest();
@@ -90,14 +94,14 @@ public class MRSolverAJOptimiser extends MRSolver {
 		int returnCode;
 
 		MRSolution s = null;
-		long start = System.nanoTime();
+
 		try {
 			returnCode = pdm.optimize();
 
 			if (returnCode == OptimizationResponse.SUCCESS) {
 				double[] soln = pdm.getOptimizationResponse().getSolution();
 				s = new MRSolution(p, soln, (double) (System.nanoTime() - start) / 1_000_000_000.0, pdm.getIteration());
-				
+
 				// if (s.getTimeS() > maxTime){
 				// maxTime = s.getTimeS();
 				// System.out.println(maxTime);
@@ -109,7 +113,7 @@ public class MRSolverAJOptimiser extends MRSolver {
 				// System.out.println(Arrays.toString(initial));
 				// System.out.println(pdm.getIteration());
 				// }
-				
+
 			}
 		} catch (Exception e) {
 			// Not too worried at this point - s will be null
