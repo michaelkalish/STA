@@ -1,4 +1,4 @@
-jCMRxBNfits <- function(nsample, data, E=list(), model=NULL, proc=-1, approximate=FALSE) {
+jCMRxBNfits <- function(nsample, data, E=list(), model=NULL, proc=-1, approximate=FALSE,seed=-1) {
   d <- data
   
   if (with(d, exists('ngroup'))) {
@@ -41,8 +41,8 @@ jCMRxBNfits <- function(nsample, data, E=list(), model=NULL, proc=-1, approximat
   }
   
   problem <- problemMaker$getBaseProblem()
-  print
-  fObj <- new(J("au.edu.adelaide.fxmr.model.bin.BinCMRxFits"),as.integer(nsample), problem, as.integer(proc),approximate,FALSE)
+  print(problemMaker)
+  fObj <- new(J("au.edu.adelaide.fxmr.model.bin.BinCMRxFits"),as.integer(nsample), problem, as.integer(proc),as.logical(approximate),FALSE,.jlong(seed))
 
   p <- fObj$getP()
   datafit <- fObj$getBaseFitDiff()

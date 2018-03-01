@@ -1,5 +1,6 @@
 package au.edu.adelaide.fxmr.model.bin;
 
+import java.util.Random;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
@@ -11,6 +12,8 @@ import au.edu.adelaide.fxmr.model.mr.MRProblem;
 import au.edu.adelaide.fxmr.model.mr.MRSolver;
 import au.edu.adelaide.fxmr.model.mr.MRSolverAJOptimiser;
 import au.edu.adelaide.fxmr.model.ui.StatusFrame;
+import cern.jet.random.engine.MersenneTwister;
+import cern.jet.random.engine.RandomEngine;
 
 public class BinCMRxFits {
 	private BinBaseProblem problem;
@@ -39,6 +42,10 @@ public class BinCMRxFits {
 	}
 
 	public BinCMRxFits(int nSample, BinBaseProblem problem, int proc, boolean approximate, boolean showStatus) {
+		this(nSample, problem, proc, approximate, showStatus, -1);
+	}
+
+	public BinCMRxFits(int nSample, BinBaseProblem problem, int proc, boolean approximate, boolean showStatus, long seed) {
 		if (showStatus) {
 			sf = new StatusFrame("BinCMRxFits", running);
 			sf.updateStatus("Init...");
@@ -64,8 +71,10 @@ public class BinCMRxFits {
 
 		ExecutorService pool = Executors.newFixedThreadPool(proc);
 
+		Random r = new Random(seed == -1 ? System.currentTimeMillis() : seed);
+
 		for (int i = 0; i < nSample; i++)
-			pool.execute(new FitJob(i));
+			pool.execute(new FitJob(i, r.nextInt()));
 		pool.shutdown();
 
 		if (showStatus)
@@ -132,9 +141,11 @@ public class BinCMRxFits {
 
 	public class FitJob implements Runnable {
 		private int index;
+		private RandomEngine binRand;
 
-		public FitJob(int i) {
+		public FitJob(int i, int seed) {
 			this.index = i;
+			this.binRand = new MersenneTwister(seed);
 		}
 
 		@Override
@@ -142,26 +153,28 @@ public class BinCMRxFits {
 			if (!running.get())
 				return;
 
-			BinModel r1 = model.resample();
+			BinModel r1 = model.resample(binRand);
 
 			if (!running.get())
 				return;
 
 			BinBaseProblem pr1 = new BinBaseProblem(r1, problem.getRangeSet(), problem.getCmrModel());
-			//OLD code: BinBaseProblem pr1 = new BinBaseProblem(r1, problem.getRangeSet());
-			
-			//System.out.println("int[][][] pr1 = " + pr1.toString());
-			
+			// OLD code: BinBaseProblem pr1 = new BinBaseProblem(r1,
+			// problem.getRangeSet());
+
+			// System.out.println("int[][][] pr1 = " + pr1.toString());
+
 			BinSolution[] solnR1 = solver.solve(pr1, running);
 
 			if (!running.get())
 				return;
 
-			BinModel r2 = model.resample(solnR1);
+			BinModel r2 = model.resample(solnR1, binRand);
 			BinBaseProblem pr2 = new BinBaseProblem(r2, problem.getRangeSet(), problem.getCmrModel());
-			//OLD code: BinBaseProblem pr2 = new BinBaseProblem(r2, problem.getRangeSet());
-			
-			//System.out.println("int[][][] pr2 = " + pr2.toString());
+			// OLD code: BinBaseProblem pr2 = new BinBaseProblem(r2,
+			// problem.getRangeSet());
+
+			// System.out.println("int[][][] pr2 = " + pr2.toString());
 			if (!running.get())
 				return;
 

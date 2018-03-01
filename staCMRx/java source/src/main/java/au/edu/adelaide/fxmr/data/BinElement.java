@@ -1,6 +1,7 @@
 package au.edu.adelaide.fxmr.data;
 
 import cern.jet.random.Binomial;
+import cern.jet.random.engine.RandomEngine;
 
 public class BinElement {
 	private int[] hits;
@@ -100,7 +101,7 @@ public class BinElement {
 		return sum;
 	}
 
-	public BinElement resample() {
+	public BinElement resample(RandomEngine binRand) {
 		BinElement newElement = new BinElement();
 		newElement.n = n;
 		int nCond = n.length;
@@ -108,7 +109,8 @@ public class BinElement {
 		newElement.hits = new int[nCond];
 		newElement.misses = new int[nCond];
 		newElement.means = new double[nCond];
-
+		
+		Binomial bn = new Binomial(1, 0.5, binRand);
 		for (int i = 0; i < nCond; i++) {
 			int ni = n[i];
 			double p = means[i];
@@ -118,7 +120,7 @@ public class BinElement {
 			else if (p == 0)
 				b = 0;
 			else
-				b = Binomial.staticNextInt(ni, p);
+				b = bn.nextInt(ni, p);
 			newElement.hits[i] = b;
 			newElement.misses[i] = ni - b;
 			newElement.means[i] = (double) b / ni;
@@ -127,7 +129,7 @@ public class BinElement {
 		return newElement;
 	}
 
-	public BinElement resample(double[] altMeans) {
+	public BinElement resample(double[] altMeans,RandomEngine binRand) {
 		BinElement newElement = new BinElement();
 		newElement.n = n;
 		int nCond = n.length;
@@ -136,6 +138,8 @@ public class BinElement {
 		newElement.misses = new int[nCond];
 		newElement.means = new double[nCond];
 
+		Binomial bn = new Binomial(1, 0.5, binRand);
+		
 		for (int i = 0; i < nCond; i++) {
 			int ni = n[i];
 			double p = altMeans[i];
@@ -145,7 +149,7 @@ public class BinElement {
 			else if (p == 0)
 				b = 0;
 			else
-				b = Binomial.staticNextInt(ni, p);
+				b = bn.nextInt(ni, p);
 			newElement.hits[i] = b;
 			newElement.misses[i] = ni - b;
 			newElement.means[i] = (double) b / ni;

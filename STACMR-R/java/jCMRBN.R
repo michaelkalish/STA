@@ -16,6 +16,7 @@ jCMRBN <- function(data=list(), E=list()) {
       for (s in 1:nSubj){
         #Minus 1 to zero index
         df = as.data.frame(d[[s]][[v]], nrow=2)
+        print(unlist(df))
         problemMaker$setElement(as.integer(s-1), as.integer(v-1), as.integer(unlist(df)))
       }
     }

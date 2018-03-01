@@ -1,4 +1,4 @@
-function [p, datafit, fits] = jCMRxBNfits (nsample, data, E, model, approximate, showStatus)
+function [p, datafit, fits] = jCMRxBNfits (nsample, data, E, model, approximate, showStatus, proc, seed)
 import au.edu.adelaide.fxmr.model.bin.BinCMRxFits;
 import au.edu.adelaide.fxmr.model.bin.BinCMRProblemMaker;
 
@@ -23,6 +23,12 @@ end
 if nargin<6
     showStatus=false;
 end
+if nargin<7
+    proc=0;
+end
+if nargin<8
+    seed=-1;
+end
 if iscell(E)
     for i=1:numel(E)
         pm.addRangeSet(E{i});
@@ -46,9 +52,9 @@ for s=1:nSubj
 end
 
 problem = pm.getBaseProblem();
-proc = 0;
 
-fObj = BinCMRxFits(nsample, problem, proc, approximate, showStatus);
+
+fObj = BinCMRxFits(nsample, problem, proc, approximate, showStatus, seed);
 
 p = fObj.getP();
 
