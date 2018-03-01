@@ -3,6 +3,9 @@ function staCMRsetup(filename)
 % If filename is specified, add it to the java classpath
 % Otherwise, add the newest version of fxMR to the java classpath from the
 % higher director. Filename must be in the format "fxMR-X.X.X.jar".
+bookinfo = 'Dunn, J. C. & Kalish, M. L. (2018). State-Trace Analysis. Springer.';
+fprintf('STACMR program library Version 21.02.2018\n');
+fprintf (['Utility programs for use with the book:\n', bookinfo, '\n\n'])
 
 if nargin==0
     currdir = pwd;
@@ -27,6 +30,3 @@ disp(['STACMR linked to java library ', filename])
 javaclasspath (which(filename));
 eval(['cd ''', currdir,'''']); % return to working directory
 
-%Also add utility functions to the path
-addpath('Utility functions')
-addpath('java')

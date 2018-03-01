@@ -19,7 +19,7 @@ staCMRBN = function (data=list(), partial=list()) {
   if (missing(partial) | is.null(partial)) {partial = list()}
   if (is.matrix(partial)) {partial = adj2list(partial)} # convert adjacency matrix to list
   
-  if (is(y,"data.frame")) {y = BNframe2list(y)} # convert data frame to list of lists
+  if (is(y,"data.frame")) {y = gen2listBN(y)} # convert data frame to list of lists
   
   out = jCMRBN (y, partial) # fit model
 

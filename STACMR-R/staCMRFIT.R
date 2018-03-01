@@ -1,4 +1,4 @@
-staCMRFIT <- function (data=NULL, partial = list(), nsample=1, shrink=-1) {
+staCMRFIT <- function (data=NULL, partial = list(), nsample=1, shrink=-1, approx=F) {
 # input:
   # nsample = no. of Monte Carlo samples (about 10000 is good)
   # data = data structure (cell array or general)
@@ -24,6 +24,10 @@ staCMRFIT <- function (data=NULL, partial = list(), nsample=1, shrink=-1) {
   tol <- 10e-6
   if (missing(partial)) {partial = list()}
   if (missing(shrink)) {shrink = -1}
+  proc = -1
+  cheapP = F
+  mrTol = 0
+  seed = -1
   
   nvar =length(y)
   model = NULL
@@ -31,7 +35,7 @@ staCMRFIT <- function (data=NULL, partial = list(), nsample=1, shrink=-1) {
   
   if (!is.list(partial)) {partial = adj2list(partial)} # convert from adjacency matrix to list
   
-  output = jCMRfitsx(nsample, y, model, partial, shrink) # call java program
+  output = jCMRfitsx(nsample, y, model, partial, shrink, proc, cheapP, approx, mrTol, seed) # call java program
   
   output$fits[which(output$fits <= tol)] = 0;
   
