@@ -27,7 +27,7 @@ public class BinCMRxSolver {
 	public BinSolution[] solve(BinBaseProblem problem, AtomicBoolean running) {
 		int n = problem.getModel().getnSubj();
 		BinSolution[] solutions = new BinSolution[n];
-		for (int i = 0; i < n; i++)
+		for (int i = 0; i < n && running.get(); i++)
 			solutions[i] = solve(new BinProblem(problem.getModel(), i, problem.getRangeSet(), problem.getCmrModel()), running);
 
 		return solutions;
@@ -140,6 +140,7 @@ public class BinCMRxSolver {
 				double[][] xPrimes = current.solveMRs(mrSolver);
 				if (xPrimes == null) {
 					// failed optimisation
+					xPrimes = current.solveMRs(mrSolver);
 					return null;
 				}
 

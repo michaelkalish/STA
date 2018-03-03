@@ -54,7 +54,7 @@ public class BinCSingleTests {
 			}
 	};
 
-	@Test
+	//@Test
 	public void fitsxFINDEvilDataTest() {
 		BinModel binModel = makeBinModel(data);
 		DoubleMatrix2D cmrModel = new DenseDoubleMatrix2D(m22);

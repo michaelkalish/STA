@@ -292,7 +292,7 @@ public class BinTests {
 		BinBaseProblem bbp = new BinBaseProblem(model, null);
 
 		BinSolution[] solns = solver.solve(bbp);
-		
+
 		assertEquals(96.16838217424265, solns[0].getG2Star(), 1e-8);
 		assertEquals(16.91508967382458, solns[0].getFStar(), 1e-8);
 	}
@@ -362,7 +362,7 @@ public class BinTests {
 		// System.out.println(Arrays.toString(fits.getP()));
 	}
 
-	//@Test
+	// @Test
 	public void fitsxCancelTest() {
 		BinModel binModel = makeBinModel();
 
@@ -398,6 +398,25 @@ public class BinTests {
 
 		// Difficult to test random output!
 		// System.out.println(Arrays.toString(fits.getP()));
+	}
+
+	@Test
+	public void fitsxSeedTest() {
+		BinModel binModel = makeBinModel();
+
+		DoubleMatrix2D cmrModel = new DenseDoubleMatrix2D(new double[][] { { 1 }, { -1 } });
+		BinBaseProblem p = new BinBaseProblem(binModel, new int[][] { { 3, 4 } }, cmrModel);
+
+		int nSample = 10;
+
+		long seed = 238974;
+		BinCMRxFits fits1 = new BinCMRxFits(nSample, p, -1, true, false, seed);
+		assertEquals(18, fits1.getP().length);
+		assertTrue(fits1.getFits().length == nSample);
+
+		BinCMRxFits fits2 = new BinCMRxFits(nSample, p, -1, true, false, seed);
+		assertEquals(fits1.getP().length, fits2.getP().length);
+		assertArrayEquals(fits1.getP(), fits2.getP(), 1e-14);
 	}
 
 	@Test

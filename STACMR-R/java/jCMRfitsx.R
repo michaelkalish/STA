@@ -49,7 +49,7 @@ jCMRfitsx <- function(nsample, y, model, E=list(), shrink=-1, proc=-1, cheapP=FA
   
   if (is.data.frame(y)){
     problemMaker$setGM(.jarray(as.matrix(y), dispatch=T));
-    sol <- problemMaker$solve(as.integer(nsample),as.integer(proc),cheapP,FALSE,as.double(mrTol),as.double(mrTol*1000),approximate,FALSE,.jlong(seed),FALSE)
+    sol <- problemMaker$solve(as.integer(nsample),as.integer(proc),cheapP,FALSE,as.double(mrTol),as.double(mrTol*1000),as.logical(approximate),FALSE,.jlong(seed),FALSE)
   }else{
     if (!is.null(y[[1]][["means"]])){
       #Parametric case, probably passed in from staSTATS
@@ -71,7 +71,7 @@ jCMRfitsx <- function(nsample, y, model, E=list(), shrink=-1, proc=-1, cheapP=FA
       problemMaker$setN(as.integer(ns))
       problem <- problemMaker$getProblem()
       
-      sol <- new(J("au.edu.adelaide.fxmr.model.CMRxFits"),as.integer(nsample),problem,shrink,as.integer(proc),cheapP,FALSE,as.double(mrTol),as.double(mrTol*1000),approximate,FALSE,.jlong(seed),FALSE);
+      sol <- new(J("au.edu.adelaide.fxmr.model.CMRxFits"),as.integer(nsample),problem,shrink,as.integer(proc),cheapP,FALSE,as.double(mrTol),as.double(mrTol*1000),as.logical(approximate),FALSE,.jlong(seed),FALSE);
     }else{
       for (group in 1:nCond){
         for (iVar in 1:nVar){
