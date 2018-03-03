@@ -18,15 +18,15 @@ gen2list = function (data=NULL, varnames=list()) {
   
   group = data[,2]; ugroup = sort(unique(group)); ngroup = length(ugroup)
   var = data[,3]; uvar = sort(unique(var)); nvar = length(uvar)
-  w_in = as.matrix(data[,4:ncol(data)]) # need to coerce fully repeated designs
+  within = as.matrix(data[,4:ncol(data)])
   
   y = vector("list",ngroup)
   for (igroup in 1:ngroup) {
     temp = vector("list", nvar)
     for (ivar in 1:nvar){
       k = which(group==ugroup[igroup] & var==uvar[ivar])
-      a = as.matrix(w_in[k,])
-      # delete any variables that are all missing
+      a = as.matrix(within[k,])
+      # delete any variables that all all missing
       n = colSums(is.na(a)); k=which(n==nrow(a)); if (length(k) > 0) {a = a[,-k]}
       # store in 2D list
       y[[igroup]][[ivar]]=a
