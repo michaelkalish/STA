@@ -18,9 +18,7 @@ if (is.null(groups)) {g = rep(1,length(ys[[subject]][[1]]$means))}
 if (is.list(groups)) # convert list to vector of group id's
   {g=rep(1,length(ys[[subject]][[1]]$means)); k=0;
   for (i in 1:length(groups)) {
-    for (j in 1:length(groups[[i]]))
-    {g[k+j]=i}
-    k=k+length(groups[[i]])
+    for (j in 1:length(groups[[i]])) {g[groups[[i]][j]]=i}
     }
 }; groups=g;
 

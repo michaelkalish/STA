@@ -1,7 +1,8 @@
 staPLOT <- function (data, vars=c(1,2), groups=NULL, grouplabels=NULL, axislabels=c("DV1","DV2"),
                          xlim=NULL, ylim=NULL, pred=NULL, palette="Set1") 
 {
-  # function staPLOT (data, pred)
+  # function staPLOT (data, vars=c(1,2), groups=NULL, grouplabels=NULL, axislabels=c("DV1","DV2"),
+  # xlim=NULL, ylim=NULL, pred=NULL, palette="Set1")
   # generates state-trace plot
 # get stats from data (depending on its form)
 shrink = -1;
@@ -19,11 +20,10 @@ if (is.null(groups)) {g = rep(1,length(ys[[1]]$means))}
 if (is.list(groups)) # convert list to vector of group id's
   {g=rep(1,length(ys[[1]]$means)); k=0;
   for (i in 1:length(groups)) {
-    for (j in 1:length(groups[[i]]))
-    {g[k+j]=i}
-    k=k+length(groups[[i]])
-    }
-}; groups=g;
+    for (j in 1:length(groups[[i]])) {g[groups[[i]][j]]=i}
+  }
+}
+groups=g;
 
 if (is.null(grouplabels)) {
   grouplabels=rep(1,length(groups));
@@ -32,7 +32,7 @@ if (is.null(grouplabels)) {
     g = rep(1,length(groups));
     for (i in 1:length(groups)) {g[i]=grouplabels[[groups[i]]]};
     grouplabels=g;
-  }
+}
 
 # calculate model
 if (!is.null(pred)) {
