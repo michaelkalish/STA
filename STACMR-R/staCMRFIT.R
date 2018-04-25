@@ -29,7 +29,7 @@ staCMRFIT <- function (data=NULL, partial = list(), nsample=1, shrink=-1, approx
   mrTol = 0
   seed = -1
   
-  nvar =length(y)
+  nvar =length(y[[1]])
   model = NULL
   if (missing(model) | is.null(model)) {model = matrix(1,nvar,1)} # sta default model
   

@@ -13,8 +13,9 @@ jCMRfitsx <- function(nsample, y, model, E=list(), shrink=-1, proc=-1, cheapP=FA
     }else{
       problemMaker <- new(J("au.edu.adelaide.fxmr.model.CMRxFitsGMProblemMaker"))
       problemMaker$setShrink(shrink)
-      nVar <- length(y)
-      nCond <- length(y[[1]])
+      nGroup <- length(y)
+      nVar <- length(y[[1]])
+      nCond <- length(y[[1]][[1]]) * nGroup
     }
   }
   
@@ -73,9 +74,9 @@ jCMRfitsx <- function(nsample, y, model, E=list(), shrink=-1, proc=-1, cheapP=FA
       
       sol <- new(J("au.edu.adelaide.fxmr.model.CMRxFits"),as.integer(nsample),problem,shrink,as.integer(proc),cheapP,FALSE,as.double(mrTol),as.double(mrTol*1000),as.logical(approximate),FALSE,.jlong(seed),FALSE);
     }else{
-      for (group in 1:nCond){
+      for (group in 1:nGroup){
         for (iVar in 1:nVar){
-          problemMaker$addCell(as.integer(iVar),as.integer(group),.jarray(as.matrix(y[[iVar]][[group]]), dispatch = T))
+          problemMaker$addCell(as.integer(group),as.integer(iVar),.jarray(as.matrix(y[[group]][[iVar]]), dispatch = T))
         }
       }
  #     print(problemMaker)
