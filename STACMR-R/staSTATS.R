@@ -51,7 +51,7 @@ staSTATS <- function(data, varnames=NULL, shrink=-1, warning=0) {
         eigcov <- eigen(g.cov)
         if ((kappa(g.cov,2) < 1e6) && (min(eigcov$values) > 0))
           {s <- shrinkDiag(y.i, shrink); g.bad <- 0}
-        else
+       else
           {s <- shrinkDiag(y.i, 1); g.bad <- 1} # diagonalize ill-conditioned matrix
         g.regcov <- s$sigma; g.shrinkage = s$shrinkage
         eigRegcov <- eigen(g.regcov) # check if positive definite
@@ -60,7 +60,7 @@ staSTATS <- function(data, varnames=NULL, shrink=-1, warning=0) {
         
         Nmin <- g.n; Nmin[which(diag(nrow(g.regcov)) > g.n)] <- 1;
         g.weights <- Nmin*solve(g.regcov)
-        g.lm = LoftusMasson (y.i)
+        if (length(g.regcov)==1) {g.lm=g.regcov} else {g.lm = LoftusMasson (y.i)}
         
         # add to vectors and matrices
         i.means = c(i.means, g.means)
@@ -87,15 +87,3 @@ staSTATS <- function(data, varnames=NULL, shrink=-1, warning=0) {
   return(output)
 }
 
-LoftusMasson <- function(data) {
-  y = data
-  nr = nrow(y); nc = ncol(y)
-  m.cols = colMeans(y,na.rm=TRUE); y.cond = t(matrix(rep(m.cols,nr),nc,nr))
-  m.rows = rowMeans(y,na.rm=TRUE); y.subj = matrix(rep(m.rows,nc),nr,nc)
-  m.mean = mean(y,na.rm=TRUE); y.mean = matrix(rep(m.mean,nr*nc),nr,nc)
-  ya = y - y.cond - y.subj + y.mean; ya[is.na(ya)]=0
-  ss = sum(ya^2); df = (nr-1)*(nc-1)
-  ms.resid = ss/df
-  r = diag(rep(ms.resid,nc))
-  return(r)
-}

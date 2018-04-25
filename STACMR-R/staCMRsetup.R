@@ -28,6 +28,7 @@ source ('Utility functions/staSTATSBN.R')
 source ('Utility functions/BNframe2list.R')
 source ('Utility functions/binSTATS.R')
 source ('Utility functions/tiesort.R')
+source ('Utility functions/LoftusMasson.R')
 
 source ('java/jMR.R')
 source ('java/jMRfits.R')

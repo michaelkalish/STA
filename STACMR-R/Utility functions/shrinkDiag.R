@@ -1,5 +1,5 @@
 shrinkDiag <- function(x, shrink) {
-# shrinkDiag <- function(x, shrink)
+# shrinkDiag <-function(x, shrink)
 # x (t*n): t iid observations on n random variables
 # sigma (n*n): invertible covariance matrix estimator
 #
@@ -12,7 +12,8 @@ shrinkDiag <- function(x, shrink) {
  
   if (!is.matrix(x)) {x = as.matrix(x)} 
   if (missing(shrink)) {shrink = -1}
-  
+  sigma = var(x); shrinkage=0;
+  if (ncol(x) > 1) {
   # de-mean returns
   t = nrow(x)
   meanx = colMeans(x, na.rm=TRUE)
@@ -23,7 +24,7 @@ shrinkDiag <- function(x, shrink) {
   sample = cov(x,use='pairwise.complete.obs')*a; sample[is.na(sample)]=0
                  
   # compute prior
-  prior=diag(diag(sample))
+  if (length(sample)==1) {prior=sample} else {prior=diag(diag(sample))}
                
   if (shrink < 0) { 
     # what we call p 
@@ -43,6 +44,7 @@ shrinkDiag <- function(x, shrink) {
     
   # compute shrinkage estimator
   sigma=shrinkage*prior+(1-shrinkage)*sample
+  }
   
   return (list(sigma=sigma, shrinkage=shrinkage))
 }
