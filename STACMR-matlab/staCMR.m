@@ -1,5 +1,5 @@
-function [x, f, stats] = staCMR (data, E, shrink, tolerance, proc)
-% function [x, f, stats] = staCMR (data, E, shrink, tolerance, proc)
+function [x, f, stats] = staCMR (data, E, shrink, tolerance, proc, approx)
+% function [x, f, stats] = staCMR (data, E, shrink, tolerance, proc, approx)
 % conducts conjoint monotonic regression for STA
 % data is cell array of data or structured output from staSTATS 
 % E is an optional partial order
@@ -19,9 +19,11 @@ function [x, f, stats] = staCMR (data, E, shrink, tolerance, proc)
 % ************************************************************
 % last modified: 10 February 2017
 % checked 14 August 2017
+% approx option added 17 September 2018
 % ************************************************************
 %
 % enter defaults
+if nargin < 6, approx = 0; end
 if nargin < 5, proc = -1; end
 if nargin < 4, tolerance=0; end
 if nargin < 3, shrink=-1; end
@@ -34,9 +36,10 @@ end
 if isempty(shrink), shrink=-1; end
 if isempty(tolerance), tolerance=0; end
 if isempty(proc), proc=-1; end
+if isempty(approx), approx=0; end
 
 % call function
-[x, f, stats] = staCMRx (data, [], E, shrink, tolerance, proc);
+[x, f, stats] = staCMRx (data, [], E, shrink, tolerance, proc, approx);
 
 function [x, f, stats] = staCMRx (data, model, E, shrink, tolerance, proc, approx)
 % function [x, f, stats] = staCMRx (data, model, E, shrink, tolerance, proc, approx)
