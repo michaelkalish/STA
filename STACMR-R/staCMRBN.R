@@ -1,4 +1,4 @@
-staCMRBN = function (data=list(), partial=list()) {
+staCMRBN = function (data=list(), partial=list(), approx=FALSE) {
 # fits partial order monotonic regression model to binomial data
 # data = nsubj list of nvar lists of ncond x 2 matrices of counts (hits, misses) 
 # where ncond = no. of conditions
@@ -12,16 +12,19 @@ staCMRBN = function (data=list(), partial=list()) {
 #
 # *************************************************************************
 # converted from Matlab on 20 September 2016
+# modified for approximate algorithm 17 September 2018
 # *************************************************************************
 #
   y = data
   
   if (missing(partial) | is.null(partial)) {partial = list()}
+  if (missing(approx)  | is.null(approx)) {approx = F}
+  model = NULL # default state-trace model
   if (is.matrix(partial)) {partial = adj2list(partial)} # convert adjacency matrix to list
   
   if (is(y,"data.frame")) {y = gen2listBN(y)} # convert data frame to list of lists
   
-  out = jCMRBN (y, partial) # fit model
+  out = jCMRBN (y, partial, model, approx) # fit model
 
   #g = matrix(0, y$ngroup, y$nvar) # calculate g-squared
   #for (igroup in 1:y$ngroup) {

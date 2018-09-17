@@ -1,4 +1,4 @@
-staCMRFITBN <- function (data=NULL, partial = list(), nsample=1, model=NULL, proc=-1, approx=0, seed=-1) {
+staCMRFITBN <- function (data=NULL, partial = list(), nsample=1, approx=F) {
   # input:
   # nsample = no. of Monte Carlo samples (about 10000 is good)
   # data = data structure (cell array or general)
@@ -6,6 +6,7 @@ staCMRFITBN <- function (data=NULL, partial = list(), nsample=1, model=NULL, pro
   # partial = optional partial order model e.g. E={[1 2] [3 4 5]} indicates that
   # condition 1 <= condition 2 and condition 3 <= condition 4 <= condition 5
   # default = none (empty)
+  # approx = approximation algorithm; F = no; T = yes
   
   # output:
   # p = empirical p-value
@@ -14,8 +15,11 @@ staCMRFITBN <- function (data=NULL, partial = list(), nsample=1, model=NULL, pro
   # distribution that datafit is compared to calculate p)
   # *************************************************************************
   # converted from matlab 7 February 2018
+  # approx option added 17 September 2018
   # *************************************************************************
   
+  proc=-1
+  seed=-1
   if (is(data,"data.frame")) {
     y = gen2listBN (data) # convert from general format to list format
   } else {y = data} 
@@ -25,6 +29,8 @@ staCMRFITBN <- function (data=NULL, partial = list(), nsample=1, model=NULL, pro
   
   tol <- 10e-6
   if (missing(partial)) {partial = list()}
+  if (missing(nsample)) {nsample = 1}
+  if (missing(approx)) {approx = F}
   
   nvar =length(y)
   model = NULL

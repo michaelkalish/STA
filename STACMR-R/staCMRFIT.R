@@ -8,6 +8,7 @@ staCMRFIT <- function (data=NULL, partial = list(), nsample=1, shrink=-1, approx
   # default = none (empty)
   # shrink is parameter to control shrinkage of covariance matrix (if input is not stats form);
   # 0 = no shrinkage; 1 = diagonal matrix; -1 = calculate optimum, default = -1
+  # approx = approximation algorithm; F = no; T = yes
 # output:
   # p = empirical p-value
   # datafit = observed fit of monotonic (1D) model
@@ -15,6 +16,7 @@ staCMRFIT <- function (data=NULL, partial = list(), nsample=1, shrink=-1, approx
   # distribution that datafit is compared to calculate p)
   # *************************************************************************
   # converted from matlab 18 September 2016
+  # approximation option added 17 September 2018
   # *************************************************************************
 
   if (is(data,"data.frame")) {
@@ -24,6 +26,7 @@ staCMRFIT <- function (data=NULL, partial = list(), nsample=1, shrink=-1, approx
   tol <- 10e-6
   if (missing(partial)) {partial = list()}
   if (missing(shrink)) {shrink = -1}
+  if (missing(approx)) {approx = 0}
   proc = -1
   cheapP = F
   mrTol = 0
