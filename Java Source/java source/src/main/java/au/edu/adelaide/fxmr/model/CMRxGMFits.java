@@ -149,7 +149,7 @@ public class CMRxGMFits implements Fits {
 		CMRxProblem initProblem = new CMRxProblem(csSTAmeans, weights, adj, model);
 		// Use parallel solver for first solution
 		CMRSolution initSoln;
-		if (onlySTAMR) {
+		if (onlySTAMR || approximate) {
 			initSoln = solver.solve(initProblem);
 		} else {
 			ParCMRxSolver parSolver = new ParCMRxSolver();
