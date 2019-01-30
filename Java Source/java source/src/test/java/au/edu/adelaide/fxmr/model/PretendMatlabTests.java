@@ -242,5 +242,4 @@ public class PretendMatlabTests {
 
 		assertNotEquals(fits1.getDataFit(), fits2.getDataFit());
 	}
-
 }
