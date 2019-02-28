@@ -13,9 +13,10 @@ gen2list = function (data=NULL, varnames=list()) {
   # written 12 September 2016
   # revised 9 March 2017 to remove missing within variables in a group
   # revised 22 August 2017 to add variable names
+  # revised 28 February 2019 to repair variable names
   # *************************************************************************
   #
-  
+  if (!missing(varnames)) {colnames(data)[4:ncol(data)]=varnames}
   group = data[,2]; ugroup = sort(unique(group)); ngroup = length(ugroup)
   var = data[,3]; uvar = sort(unique(var)); nvar = length(uvar)
   within = as.matrix(data[,4:ncol(data)])
@@ -30,7 +31,6 @@ gen2list = function (data=NULL, varnames=list()) {
       n = colSums(is.na(a)); k=which(n==nrow(a)); if (length(k) > 0) {a = a[,-k]}
       # store in 2D list
       y[[igroup]][[ivar]]=a
-      if (!missing(varnames)) {names(y[[igroup]][[ivar]])=varnames}
     }
   }
   return (y)
