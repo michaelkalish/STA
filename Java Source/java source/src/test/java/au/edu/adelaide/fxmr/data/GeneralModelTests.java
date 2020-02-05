@@ -295,11 +295,15 @@ public class GeneralModelTests {
 			adj[i] = a;
 		}
 
-		CMRxGMFits fits = new CMRxGMFits(1000, gm, -1, model, adj, -1, false, false, 0, 0, false, false, 242343l, false);
+		int nFit = 1000;
+		
+		CMRxGMFits fits = new CMRxGMFits(nFit, gm, -1, model, adj, -1, false, false, 0, 0, false, false, 242343l, false);
 		assertEquals(1.5771779458404, fits.getDataFit(), 1e-9);
 		assertEquals(0.177, fits.getP(), 1e-9);
 		assertEquals(0.23202811288387803, fits.getFits()[1], 1e-9);
 		assertEquals(0.633664696462513, fits.getFits()[10], 1e-9);
+		
+		assertEquals(nFit, fits.getXStars().length);
 	}
 
 	@Test

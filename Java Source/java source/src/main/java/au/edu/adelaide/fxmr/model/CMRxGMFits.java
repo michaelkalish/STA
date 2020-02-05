@@ -19,6 +19,7 @@ import cern.colt.matrix.impl.DenseDoubleMatrix2D;
 
 public class CMRxGMFits implements Fits {
 	private double[] fits;
+	private double[][][] xStars;
 	private Badness[] badnesses;
 	private double p;
 	private double dataFit;
@@ -55,37 +56,41 @@ public class CMRxGMFits implements Fits {
 	// TODO: this overloading is a mess - clean it up one day!
 	public CMRxGMFits(int nSample, GeneralModel gm, DoubleMatrix2D model, HashSet<SimpleLinearConstraint>[] adj,
 			int proc) {
-		this(nSample, gm, 0, true, model, adj, proc, false, false, MRSolver.TOL1, MRSolver.TOL2, false, false, -1, false);
+		this(nSample, gm, 0, true, model, adj, proc, false, false, MRSolver.TOL1, MRSolver.TOL2, false, false, -1,
+				false);
 	}
 
 	public CMRxGMFits(int nSample, GeneralModel gm, double shrinkage, DoubleMatrix2D model,
 			HashSet<SimpleLinearConstraint>[] adj, int proc, boolean cheapP, boolean onlySTAMR) {
-		this(nSample, gm, shrinkage, shrinkage < 0, model, adj, proc, cheapP, onlySTAMR, MRSolver.TOL1, MRSolver.TOL2, false, false, -1, false);
+		this(nSample, gm, shrinkage, shrinkage < 0, model, adj, proc, cheapP, onlySTAMR, MRSolver.TOL1, MRSolver.TOL2,
+				false, false, -1, false);
 	}
 
 	public CMRxGMFits(int nSample, GeneralModel gm, double shrink, DoubleMatrix2D denseDoubleMatrix2D,
-			HashSet<SimpleLinearConstraint>[] dMatAs, int proc, boolean cheapP, boolean onlySTAMR, double mrTol1, double mrTol2) {
+			HashSet<SimpleLinearConstraint>[] dMatAs, int proc, boolean cheapP, boolean onlySTAMR, double mrTol1,
+			double mrTol2) {
 		this(nSample, gm, shrink, denseDoubleMatrix2D, dMatAs, proc, cheapP, onlySTAMR, mrTol1, mrTol2, false);
 	}
 
 	public CMRxGMFits(int nSample, GeneralModel gm, double shrink, DoubleMatrix2D denseDoubleMatrix2D,
-			HashSet<SimpleLinearConstraint>[] dMatAs, int proc, boolean cheapP2, boolean onlySTAMR, double mrTol1, double mrTol2,
-			boolean approximate) {
-		this(nSample, gm, shrink, shrink < 0, denseDoubleMatrix2D, dMatAs, proc, cheapP2, onlySTAMR, mrTol1, mrTol2, approximate,
-				false, -1, false);
+			HashSet<SimpleLinearConstraint>[] dMatAs, int proc, boolean cheapP2, boolean onlySTAMR, double mrTol1,
+			double mrTol2, boolean approximate) {
+		this(nSample, gm, shrink, shrink < 0, denseDoubleMatrix2D, dMatAs, proc, cheapP2, onlySTAMR, mrTol1, mrTol2,
+				approximate, false, -1, false);
 	}
 
 	public CMRxGMFits(int nSample, GeneralModel gm, double shrink, DoubleMatrix2D denseDoubleMatrix2D,
-			HashSet<SimpleLinearConstraint>[] dMatAs, int proc, boolean cheapP2, boolean onlySTAMR, double mrTol1, double mrTol2,
-			boolean approximate, boolean reverse) {
-		this(nSample, gm, shrink, shrink < 0, denseDoubleMatrix2D, dMatAs, proc, cheapP2, onlySTAMR, mrTol1, mrTol2, approximate,
-				reverse, -1, false);
+			HashSet<SimpleLinearConstraint>[] dMatAs, int proc, boolean cheapP2, boolean onlySTAMR, double mrTol1,
+			double mrTol2, boolean approximate, boolean reverse) {
+		this(nSample, gm, shrink, shrink < 0, denseDoubleMatrix2D, dMatAs, proc, cheapP2, onlySTAMR, mrTol1, mrTol2,
+				approximate, reverse, -1, false);
 	}
 
-	public CMRxGMFits(int nSample, GeneralModel gm, double shrink, DenseDoubleMatrix2D denseDoubleMatrix2D, HashSet<SimpleLinearConstraint>[] dMatAs, int proc,
-			boolean cheapP, boolean onlySTAMR, double mrTol1, double mrTol2, boolean approximate, boolean reverse, long seed, boolean showStatus) {
-		this(nSample, gm, shrink, shrink < 0, denseDoubleMatrix2D, dMatAs, proc, cheapP, onlySTAMR, mrTol1, mrTol2, approximate,
-				reverse, seed, showStatus);
+	public CMRxGMFits(int nSample, GeneralModel gm, double shrink, DenseDoubleMatrix2D denseDoubleMatrix2D,
+			HashSet<SimpleLinearConstraint>[] dMatAs, int proc, boolean cheapP, boolean onlySTAMR, double mrTol1,
+			double mrTol2, boolean approximate, boolean reverse, long seed, boolean showStatus) {
+		this(nSample, gm, shrink, shrink < 0, denseDoubleMatrix2D, dMatAs, proc, cheapP, onlySTAMR, mrTol1, mrTol2,
+				approximate, reverse, seed, showStatus);
 	}
 
 	/**
@@ -178,6 +183,7 @@ public class CMRxGMFits implements Fits {
 		}
 
 		fits = new double[nSample];
+		xStars = new double[nSample][][];
 		if (showStatus)
 			complete = new boolean[nSample];
 
@@ -264,6 +270,7 @@ public class CMRxGMFits implements Fits {
 				}
 
 				fits[index] = tmpSolution.getFStar();
+				xStars[index] = tmpSolution.getXStar();
 
 				if (adj != null && adj.length > 0 && !onlySTAMR) {
 					// Take away MR from fit
@@ -279,13 +286,12 @@ public class CMRxGMFits implements Fits {
 
 			times[index] = (System.nanoTime() - start) / 1000000000.0;
 			badnesses[index] = worst;
-			
+
 			if (sf != null) {
 				complete[index] = true;
 				updateSF();
 			}
 		}
-
 
 		private void updateSF() {
 			if (System.currentTimeMillis() < nextUpdate) {
@@ -334,7 +340,6 @@ public class CMRxGMFits implements Fits {
 			sf.updateStatus(sb.toString());
 		}
 
-		
 		private CMRxProblem makeCMRxProblem(GeneralModel gm) {
 			try {
 				CombinedStatsSTA[] csSTA = autoShrink ? gm.calcStats() : gm.calcStats(shrinkage);
@@ -356,7 +361,6 @@ public class CMRxGMFits implements Fits {
 			}
 		}
 	}
-
 
 	@Override
 	public Badness[] getBadnesses() {
@@ -404,5 +408,9 @@ public class CMRxGMFits implements Fits {
 
 	public double[] getFits() {
 		return subGet(fits);
+	}
+	
+	public double[][][] getXStars() {
+		return xStars;
 	}
 }

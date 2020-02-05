@@ -19,6 +19,7 @@ import cern.colt.matrix.impl.DenseDoubleMatrix2D;
 
 public class CMRxFits implements Fits {
 	private double[] fits;
+	private double[][][] xStars;
 	private double[] times;
 	private double p;
 	private double dataFit;
@@ -59,18 +60,18 @@ public class CMRxFits implements Fits {
 		this(nSample, problem, shrink, proc, cheapP, onlySTAMR, 0, 0);
 	}
 
-	public CMRxFits(int nSample, CMRxFitsProblem problem, double shrink, int proc, boolean cheapP, boolean onlySTAMR, double mrTol1,
-			double mrTol2) {
+	public CMRxFits(int nSample, CMRxFitsProblem problem, double shrink, int proc, boolean cheapP, boolean onlySTAMR,
+			double mrTol1, double mrTol2) {
 		this(nSample, problem, shrink, proc, cheapP, onlySTAMR, mrTol1, mrTol2, false, false);
 	}
 
-	public CMRxFits(int nSample, CMRxFitsProblem problem, double shrink, int proc, boolean cheapP, boolean onlySTAMR, double mrTol1,
-			double mrTol2, boolean approximate) {
+	public CMRxFits(int nSample, CMRxFitsProblem problem, double shrink, int proc, boolean cheapP, boolean onlySTAMR,
+			double mrTol1, double mrTol2, boolean approximate) {
 		this(nSample, problem, shrink, proc, cheapP, onlySTAMR, mrTol1, mrTol2, approximate, false);
 	}
 
-	public CMRxFits(int nSample, CMRxFitsProblem problem, double shrink, int proc, boolean cheapP, boolean onlySTAMR, double mrTol1,
-			double mrTol2, boolean approximate, boolean reverse) {
+	public CMRxFits(int nSample, CMRxFitsProblem problem, double shrink, int proc, boolean cheapP, boolean onlySTAMR,
+			double mrTol1, double mrTol2, boolean approximate, boolean reverse) {
 		this(nSample, problem, shrink, proc, cheapP, onlySTAMR, mrTol1, mrTol2, approximate, false, -1, false);
 	}
 
@@ -81,8 +82,8 @@ public class CMRxFits implements Fits {
 	 * @param problem
 	 * @param proc
 	 */
-	public CMRxFits(int nSample, CMRxFitsProblem problem, double shrink, int proc, boolean cheapP, boolean onlySTAMR, double mrTol1,
-			double mrTol2, boolean approximate, boolean reverse, long seed, boolean showStatus) {
+	public CMRxFits(int nSample, CMRxFitsProblem problem, double shrink, int proc, boolean cheapP, boolean onlySTAMR,
+			double mrTol1, double mrTol2, boolean approximate, boolean reverse, long seed, boolean showStatus) {
 		this.problem = problem;
 		this.shrink = shrink;
 		this.cheapP = cheapP;
@@ -104,7 +105,8 @@ public class CMRxFits implements Fits {
 			if (!dists[i].isSymPosDef()) {
 				// This will probably be called from MATLAB so report it
 				// one-indexed.
-				System.err.println("Input covariance matrix " + (i + 1) + " is not positive definite?! (1 indexed, nvar=\" + nVar + \")");
+				System.err.println("Input covariance matrix " + (i + 1)
+						+ " is not positive definite?! (1 indexed, nvar=\" + nVar + \")");
 				return;
 			}
 		}
@@ -142,6 +144,7 @@ public class CMRxFits implements Fits {
 		}
 
 		fits = new double[nSample];
+		xStars = new double[nSample][][];
 		if (showStatus)
 			complete = new boolean[nSample];
 
@@ -182,8 +185,7 @@ public class CMRxFits implements Fits {
 	}
 
 	/**
-	 * Parametric bootstrab using recycled MultivariateNormalDistribution
-	 * objects
+	 * Parametric bootstrab using recycled MultivariateNormalDistribution objects
 	 * 
 	 * @param dists
 	 * @param ybs
@@ -258,6 +260,7 @@ public class CMRxFits implements Fits {
 			tmpSolution = solver.solve(tmpProblem, null, cheapP, dataFit);
 
 			fits[index] = tmpSolution.getFStar();
+			xStars[index] = tmpSolution.getXStar();
 
 			if (adj != null && adj.length > 0 && !onlySTAMR) {
 				// Take away MR from dataFit
@@ -372,5 +375,9 @@ public class CMRxFits implements Fits {
 
 	public double[] getFits() {
 		return subGet(fits);
+	}
+
+	public double[][][] getXStars() {
+		return xStars;
 	}
 }
