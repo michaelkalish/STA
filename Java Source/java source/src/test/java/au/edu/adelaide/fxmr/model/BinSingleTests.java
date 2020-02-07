@@ -68,6 +68,7 @@ public class BinSingleTests {
 		BinCMRxFits fits = new BinCMRxFits(nSample, p, -1, true, true);
 		// Assuming we dont cancel...
 		assertTrue(fits.getFits().length == nSample);
+		assertTrue(fits.getXStars().length == nSample);
 	}
 
 	/**

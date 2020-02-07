@@ -339,6 +339,8 @@ public class BinTests {
 		BinCMRFits fits = new BinCMRFits(10, p);
 
 		assertEquals(18, fits.getP().length);
+		assertEquals(10, fits.getFits().length);
+		assertEquals(10, fits.getXStars().length);
 		// Difficult to test random output!
 		// System.out.println(Arrays.toString(fits.getP()));
 	}
@@ -357,6 +359,7 @@ public class BinTests {
 
 		// Assuming we cancel...
 		assertTrue(fits.getFits().length == nSample);
+		assertTrue(fits.getXStars().length == nSample);
 
 		// Difficult to test random output!
 		// System.out.println(Arrays.toString(fits.getP()));
@@ -395,6 +398,7 @@ public class BinTests {
 
 		// Assuming we dont cancel...
 		assertTrue(fits.getFits().length == nSample);
+		assertTrue(fits.getXStars().length == nSample);
 
 		// Difficult to test random output!
 		// System.out.println(Arrays.toString(fits.getP()));
@@ -413,9 +417,11 @@ public class BinTests {
 		BinCMRxFits fits1 = new BinCMRxFits(nSample, p, -1, true, false, seed);
 		assertEquals(18, fits1.getP().length);
 		assertTrue(fits1.getFits().length == nSample);
+		assertTrue(fits1.getXStars().length == nSample);
 
 		BinCMRxFits fits2 = new BinCMRxFits(nSample, p, -1, true, false, seed);
 		assertEquals(fits1.getP().length, fits2.getP().length);
+		assertEquals(fits1.getXStars().length, fits2.getXStars().length);
 		assertArrayEquals(fits1.getP(), fits2.getP(), 1e-14);
 	}
 

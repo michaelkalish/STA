@@ -17,6 +17,7 @@ public class BinCMRFits {
 	private BinModel model;
 	private double[] baseFitDiff;
 	private double[][] fits;
+	private double[][][][] xStars;
 	private double[] p;
 	private int nSubj;
 	private boolean notCoupled;
@@ -41,11 +42,13 @@ public class BinCMRFits {
 		this.model = problem.getModel();
 		this.nSubj = model.getnSubj();
 		this.notCoupled = notCoupled;
-		this.baseFitDiff = calcFitDiff(problem, notCoupled ? new BinMRSolver() : new BinCMRSolver());
+		this.baseFitDiff = calcFitDiff(problem, notCoupled ? new BinMRSolver() : new BinCMRSolver(), -1);
 
 		fits = new double[nSample][];
+		xStars = new double[nSample][][][];
 
-		ExecutorService pool = Executors.newFixedThreadPool(proc < 1 ? Runtime.getRuntime().availableProcessors() : proc);
+		ExecutorService pool = Executors
+				.newFixedThreadPool(proc < 1 ? Runtime.getRuntime().availableProcessors() : proc);
 
 		Random r = new Random(seed == -1 ? System.currentTimeMillis() : seed);
 
@@ -70,12 +73,13 @@ public class BinCMRFits {
 		}
 	}
 
-	private double[] calcFitDiff(BinBaseProblem problemLoc, BinCMRSolver solver) {
+	private double[] calcFitDiff(BinBaseProblem problemLoc, BinCMRSolver solver, int index) {
 		BinModel modelLoc = problemLoc.getModel();
 		int nVar = modelLoc.getnVar();
 		int nSubj = modelLoc.getnSubj();
 
 		double[] fitDiff = new double[nSubj];
+		double[][][] curXStars = new double[nSubj][nVar][];
 
 		if (problemLoc.getRangeSet() != null && problemLoc.getRangeSet().length != 0 && !notCoupled) {
 			MRSolver mrSolver = new MRSolverAJOptimiser();
@@ -88,6 +92,7 @@ public class BinCMRFits {
 					double[] x = mrSolver.solve(mrp).getxVector();
 					BinTrial.clampZeroOne(x);
 					g2Val += BinTrial.mleBN(data, x);
+					curXStars[s][v] = x;
 				}
 
 				fitDiff[s] -= g2Val;
@@ -98,6 +103,11 @@ public class BinCMRFits {
 		for (int s = 0; s < nSubj; s++)
 			fitDiff[s] += solns[s].getG2Star();
 
+		if (index != -1) {
+			// When it's -1, we're only calculating the initial value
+			fits[index] = fitDiff;
+			xStars[index] = curXStars;
+		}
 		return fitDiff;
 	}
 
@@ -122,7 +132,7 @@ public class BinCMRFits {
 			BinModel r2 = model.resample(solnR1, binRand);
 			BinBaseProblem pr2 = new BinBaseProblem(r2, problem.getRangeSet());
 
-			fits[index] = calcFitDiff(pr2, solver);
+			calcFitDiff(pr2, solver, index);
 		}
 	}
 
@@ -136,5 +146,9 @@ public class BinCMRFits {
 
 	public double[] getBaseFitDiff() {
 		return baseFitDiff;
+	}
+
+	public double[][][][] getXStars() {
+		return xStars;
 	}
 }

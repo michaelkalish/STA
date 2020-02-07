@@ -20,6 +20,7 @@ public class BinCMRxFits {
 	private BinModel model;
 	private double[] baseFitDiff;
 	private double[][] fits;
+	private double[][][][] xStars;
 	private boolean[] complete;
 	private AtomicBoolean running = new AtomicBoolean(true);
 	private double[] p;
@@ -45,7 +46,8 @@ public class BinCMRxFits {
 		this(nSample, problem, proc, approximate, showStatus, -1);
 	}
 
-	public BinCMRxFits(int nSample, BinBaseProblem problem, int proc, boolean approximate, boolean showStatus, long seed) {
+	public BinCMRxFits(int nSample, BinBaseProblem problem, int proc, boolean approximate, boolean showStatus,
+			long seed) {
 		if (showStatus) {
 			sf = new StatusFrame("BinCMRxFits", running);
 			sf.updateStatus("Init...");
@@ -57,7 +59,7 @@ public class BinCMRxFits {
 		this.problem = problem;
 		this.model = problem.getModel();
 		this.nSubj = model.getnSubj();
-		this.baseFitDiff = calcFitDiff(problem);
+		this.baseFitDiff = calcFitDiff(problem, -1);
 		this.nSample = nSample;
 
 		proc = proc < 1 ? Runtime.getRuntime().availableProcessors() : proc;
@@ -66,6 +68,7 @@ public class BinCMRxFits {
 		}
 
 		fits = new double[nSample][];
+		xStars = new double[nSample][][][];
 		if (showStatus)
 			complete = new boolean[nSample];
 
@@ -108,12 +111,13 @@ public class BinCMRxFits {
 			sf.setFinished();
 	}
 
-	private double[] calcFitDiff(BinBaseProblem problemLoc) {
+	private double[] calcFitDiff(BinBaseProblem problemLoc, int index) {
 		BinModel modelLoc = problemLoc.getModel();
 		int nVar = modelLoc.getnVar();
 		int nSubj = modelLoc.getnSubj();
 
 		double[] fitDiff = new double[nSubj];
+		double[][][] curXStars = new double[nSubj][nVar][];
 
 		if (problemLoc.getRangeSet() != null && problemLoc.getRangeSet().length != 0) {
 			MRSolver mrSolver = new MRSolverAJOptimiser();
@@ -126,6 +130,7 @@ public class BinCMRxFits {
 					double[] x = mrSolver.solve(mrp).getxVector();
 					BinTrial.clampZeroOne(x);
 					g2Val += BinTrial.mleBN(data, x);
+					curXStars[s][v] = x;
 				}
 
 				fitDiff[s] -= g2Val;
@@ -135,6 +140,11 @@ public class BinCMRxFits {
 		BinSolution[] solns = solver.solve(problemLoc, running);
 		for (int s = 0; s < nSubj; s++)
 			fitDiff[s] += solns[s].getG2Star();
+
+		if (index != -1) {
+			fits[index] = fitDiff;
+			xStars[index] = curXStars;
+		}
 
 		return fitDiff;
 	}
@@ -178,7 +188,7 @@ public class BinCMRxFits {
 			if (!running.get())
 				return;
 
-			fits[index] = calcFitDiff(pr2);
+			calcFitDiff(pr2, index);
 
 			if (sf != null) {
 				complete[index] = true;
@@ -257,5 +267,9 @@ public class BinCMRxFits {
 
 	public double[] getBaseFitDiff() {
 		return baseFitDiff;
+	}
+
+	public double[][][][] getXStars() {
+		return xStars;
 	}
 }

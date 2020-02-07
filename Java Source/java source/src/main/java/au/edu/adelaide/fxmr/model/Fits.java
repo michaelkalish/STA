@@ -11,4 +11,6 @@ public interface Fits {
 	Badness[] getBadnesses();
 	
 	double[] getTimes();
+	
+	public double[][][] getXStars();
 }
