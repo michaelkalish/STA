@@ -4,7 +4,7 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>fxMR</groupId>
 	<artifactId>fxMR</artifactId>
-	<version>0.3.43</version>
+	<version>0.3.44</version>
 	<build>
 		<sourceDirectory>src/main/java</sourceDirectory>
 		<testSourceDirectory>src/test/java</testSourceDirectory>

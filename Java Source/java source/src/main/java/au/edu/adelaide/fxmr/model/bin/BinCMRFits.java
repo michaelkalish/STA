@@ -79,7 +79,7 @@ public class BinCMRFits {
 		int nSubj = modelLoc.getnSubj();
 
 		double[] fitDiff = new double[nSubj];
-		double[][][] curXStars = new double[nSubj][nVar][];
+		double[][][] curXStars = new double[nSubj][][];
 
 		if (problemLoc.getRangeSet() != null && problemLoc.getRangeSet().length != 0 && !notCoupled) {
 			MRSolver mrSolver = new MRSolverAJOptimiser();
@@ -92,7 +92,6 @@ public class BinCMRFits {
 					double[] x = mrSolver.solve(mrp).getxVector();
 					BinTrial.clampZeroOne(x);
 					g2Val += BinTrial.mleBN(data, x);
-					curXStars[s][v] = x;
 				}
 
 				fitDiff[s] -= g2Val;
@@ -100,8 +99,10 @@ public class BinCMRFits {
 		}
 
 		BinSolution[] solns = solver.solve(problemLoc);
-		for (int s = 0; s < nSubj; s++)
+		for (int s = 0; s < nSubj; s++) {
 			fitDiff[s] += solns[s].getG2Star();
+			curXStars[s] = solns[s].getXStar();
+		}
 
 		if (index != -1) {
 			// When it's -1, we're only calculating the initial value

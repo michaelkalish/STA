@@ -341,6 +341,8 @@ public class BinTests {
 		assertEquals(18, fits.getP().length);
 		assertEquals(10, fits.getFits().length);
 		assertEquals(10, fits.getXStars().length);
+		
+		assertNotNull(fits.getXStars()[0][0][0]);
 		// Difficult to test random output!
 		// System.out.println(Arrays.toString(fits.getP()));
 	}
