@@ -1,4 +1,4 @@
-function [p, datafit, fits] = jCMRBNfits (nsample, data, E, proc, seed)
+function [p, datafit, fits, pars] = jCMRBNfits (nsample, data, E, proc, seed)
 import au.edu.adelaide.fxmr.model.bin.BinCMRFits;
 import au.edu.adelaide.fxmr.model.bin.BinCMRProblemMaker;
 
@@ -49,3 +49,4 @@ p = fObj.getP();
 
 datafit = fObj.getBaseFitDiff();
 fits = fObj.getFits()';
+pars = fObj.getXStars();
