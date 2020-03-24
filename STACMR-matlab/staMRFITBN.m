@@ -1,5 +1,5 @@
-function [p, datafit, fits] = staMRFITBN (data, varargin)
-% [p, datafit, fits\] = staMRFITBN (data, varargin)
+function [p, datafit, fits, pars] = staMRFITBN (data, varargin)
+% [p, datafit, fits, pars] = staMRFITBN (data, varargin)
 % Binomial version of staMRFIT
 % nsample = no. of Monte Carlo samples (about 10000 is good)
 % data = data structure (cell array, general, or structured)
@@ -13,9 +13,11 @@ function [p, datafit, fits] = staMRFITBN (data, varargin)
 % fits = nsample vector of fits of Monte Carlo samples (it is against this
 % distribution that datafit is compared to calculate p).
 % Note: These are g-squared values (not least squares)
+% pars = nvar cell array of bootstrap means nsample x ncond x nsub
 % *************************************************************************
 % Last modified: 24 February 2017
 % updated 10 March 2017
+% modified to return pars 24 March 2020
 % *************************************************************************
 %
 tol = 1e-10;
@@ -24,7 +26,7 @@ if ~iscell(data)
 else
     y = data;
 end
-
+nvar = size(y,2);
 nsample = 1;
 E = {};
 
@@ -47,8 +49,13 @@ if isempty(E)
     disp ('Warning: Partial order undefined.');
 end
 
-[p, datafit, fits] = jMRBNfits(nsample, y, E); % returns G2 values as datafit (and fits)
+[p, datafit, fits, pararray] = jMRBNfits(nsample, y, E); % returns G2 values as datafit (and fits)
 
 % clear up near zero values
 datafit(datafit<tol)=0;
 fits(fits<tol)=0;
+pars = cell(1,nvar); % pars contains bootstrap means
+for ivar=1:nvar
+	z = squeeze(pararray(:,:,ivar,:));
+    pars{ivar} = permute(z, [1 3 2]);
+end

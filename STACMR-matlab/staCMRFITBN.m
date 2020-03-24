@@ -1,5 +1,5 @@
-function [p, datafit, fits] = staCMRFITBN (data, varargin)
-% [p, datafit, fits] = staCMRFITBN (data, varargin)
+function [p, datafit, fits, pars] = staCMRFITBN (data, varargin)
+% [p, datafit, fits, pars] = staCMRFITBN (data, varargin)
 % Binomial version of staCMRFIT
 % nsample = no. of Monte Carlo samples (about 10000 is good)
 % data = data structure (cell array, general, or structured)
@@ -13,8 +13,10 @@ function [p, datafit, fits] = staCMRFITBN (data, varargin)
 % fits = nsample vector of fits of Monte Carlo samples (it is against this
 % distribution that datafit is compared to calculate p)
 % % Note: These are g-squared values (not least squares)
+% % pars = nvar cell array of bootstrap means nsample x ncond x nsub
 % *************************************************************************
 % Last modified: 24 April 2017
+% pars output added 4 March 2020
 % *************************************************************************
 %
 if ~iscell(data)
@@ -31,6 +33,7 @@ model = ones(nvar,1);
 approximate = 0;
 showStatus = 0;
 ranseed = -1;
+tol = 1e-6;
 
 % set arguments if specified
 for i = 1 : 2 : length(varargin)-1
@@ -56,4 +59,13 @@ if ~iscell(E)
     E = adj2cell(E); % convert from adjacency matrix form
 end
 
-[p, datafit, fits] = jCMRxBNfits(nsample, y, E, model, approximate, showStatus);
+[p, datafit, fits, pararray] = jCMRxBNfits(nsample, y, E, model, approximate, showStatus, ranseed);
+% additional changes March 2020
+datafit(datafit<tol) = 0;
+fits (fits < tol) = 0;
+pars = cell(1,nvar); % pars contains bootstrap means
+for ivar=1:nvar
+	z = squeeze(pararray(:,:,ivar,:));
+    pars{ivar} = permute(z, [1 3 2]);
+end
+
