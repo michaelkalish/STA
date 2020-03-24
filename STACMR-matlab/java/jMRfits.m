@@ -1,5 +1,5 @@
-function [p, datafit, fits, maxbad, times] = jMRfits(nsample, y, E, shrink, reverse, proc, mrTol, seed, showStatus)
-% function [p, datafit, fits, maxbad, times] = jMRfits(nsample, y, E, shrink, proc)
+function [p, datafit, fits, pars, maxbad, times] = jMRfits(nsample, y, E, shrink, reverse, proc, mrTol, seed, showStatus)
+% function [p, datafit, fits, pars, maxbad, times] = jMRfits(nsample, y, E, shrink, proc)
 % jMRfits that calls the same java code as jCMRfits but with a parameter to
 % use the non-coupled code (model is ignored and never set).
 
@@ -102,6 +102,7 @@ end
 p = sol.getP();
 fits = sol.getFits();
 datafit = sol.getDataFit();
+pars = sol.getXStars();
 maxbad = zeros(1,nsample);
 bads = sol.getBadnesses();
 for i=1:bads.length

@@ -1,4 +1,4 @@
-function [p, datafit, fits, maxbad, times] = jCMRfitsx(nsample,y, model, E, shrink, proc, cheapP, approximate, mrTol,seed,showStatus)
+function [p, datafit, fits, pars, maxbad, times] = jCMRfitsx(nsample,y, model, E, shrink, proc, cheapP, approximate, mrTol,seed,showStatus)
 import au.edu.adelaide.fxmr.model.*;
 
 if nargin < 4, E={};end
@@ -106,9 +106,11 @@ end
 p = sol.getP();
 fits = sol.getFits();
 datafit = sol.getDataFit();
+pars = sol.getXStars(); 
 maxbad = zeros(1,nsample);
 bads = sol.getBadnesses();
 for i=1:bads.length
     maxbad(i) = bads(i).ordinal();
 end
 times=sol.getTimes();
+
