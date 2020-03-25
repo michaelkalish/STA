@@ -15,7 +15,7 @@ jCMRfitsx <- function(nsample, y, model, E=list(), shrink=-1, proc=-1, cheapP=FA
       problemMaker$setShrink(shrink)
       nGroup <- length(y)
       nVar <- length(y[[1]])
-      nCond <- length(y[[1]][[1]]) * nGroup
+      nCond <- length(y[[1]][[1]][1,]) * nGroup
     }
   }
   
@@ -84,6 +84,7 @@ jCMRfitsx <- function(nsample, y, model, E=list(), shrink=-1, proc=-1, cheapP=FA
       sol <- problemMaker$solve(as.integer(nsample),as.integer(proc),as.logical(cheapP),FALSE,as.double(mrTol),as.double(mrTol*1000),as.logical(approximate),FALSE,.jlong(seed),FALSE);
     }
   }
+  pars = .jevalArray(sol$getXStars(),simplify=F)
   
-  return(list(p = sol$getP(), fits = sol$getFits(),datafit = sol$getDataFit()))
+  return(list(p = sol$getP(), datafit = sol$getDataFit(), fits = sol$getFits(), pars = pars))
 }

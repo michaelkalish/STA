@@ -40,6 +40,7 @@ jCMRxBNfits <- function(nsample, data, E=list(), model=NULL, proc=-1, approximat
   p <- fObj$getP()
   datafit <- fObj$getBaseFitDiff()
   fits <- t(.jevalArray(fObj$getFits(),simplify=T))
+  pars <- .jevalArray(fObj$getXStars(),simplify=F)
   
-  return(list(p=p,datafit=datafit,fits=fits))
+  return(list(p=p,datafit=datafit,fits=fits,pars=pars))
 }

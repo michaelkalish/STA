@@ -37,6 +37,7 @@ jMRBNfits <- function(nsample, data, E=list(),proc=-1) {
   p <- fObj$getP()
   datafit <- fObj$getBaseFitDiff()
   fits <- t(.jevalArray(fObj$getFits(),simplify=T))
+  pars <- .jevalArray(fObj$getXStars(),simplify=F)
   
-  return(list(p=p,datafit=datafit,fits=fits))
+  return(list(p=p,datafit=datafit,fits=fits,pars=pars))
 }
