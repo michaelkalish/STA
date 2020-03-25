@@ -14,9 +14,11 @@ staCMRFIT <- function (data=NULL, partial = list(), nsample=1, shrink=-1, approx
   # datafit = observed fit of monotonic (1D) model
   # fits = nsample vector of fits of Monte Carlo samples (it is against this
   # distribution that datafit is compared to calculate p)
+  # pars = nvar list of bootstrap means nsample x ncond
   # *************************************************************************
   # converted from matlab 18 September 2016
   # approximation option added 17 September 2018
+  # bootstrap parameter estimates added 24 March 2020
   # *************************************************************************
 
   if (is(data,"data.frame")) {
@@ -32,7 +34,9 @@ staCMRFIT <- function (data=NULL, partial = list(), nsample=1, shrink=-1, approx
   mrTol = 0
   seed = -1
   
-  nvar =length(y[[1]])
+  nvar = length(y[[1]])
+  ngroup = length(y); ncond = length(y[[1]][[1]][1,]) * ngroup
+  
   model = NULL
   if (missing(model) | is.null(model)) {model = matrix(1,nvar,1)} # sta default model
   
@@ -41,6 +45,19 @@ staCMRFIT <- function (data=NULL, partial = list(), nsample=1, shrink=-1, approx
   output = jCMRfitsx(nsample, y, model, partial, shrink, proc, cheapP, approx, mrTol, seed) # call java program
   
   output$fits[which(output$fits <= tol)] = 0;
+  output$datafit[which(output$datafit <= tol)] = 0;
+  
+  # unpack bootstrap means
+  z = array(0,dim=c(nvar,ncond,nsample))
+  for (isample in 1:nsample) {
+    z[,,isample] = .jevalArray(output$pars[[isample]],simplify=T)
+  }
+  a = vector("list", nvar)
+  z = aperm(z,c(3,2,1))
+  for (ivar in 1:nvar){
+    a[[ivar]] = z[,,ivar]
+  }
+  output$pars = a;
   
   return (output)
 }
