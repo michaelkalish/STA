@@ -28,6 +28,7 @@ end
 % defaults
 nsample = 1;
 E = {};
+nsub = size(y,1);
 nvar = size(y,2);
 model = ones(nvar,1);
 approximate = 0;
@@ -60,12 +61,17 @@ if ~iscell(E)
 end
 
 [p, datafit, fits, pararray] = jCMRxBNfits(nsample, y, E, model, approximate, showStatus, ranseed);
-% additional changes March 2020
-datafit(datafit<tol) = 0;
-fits (fits < tol) = 0;
-pars = cell(1,nvar); % pars contains bootstrap means
+
+% clear up near zero values
+datafit(datafit<tol)=0;
+fits(fits<tol)=0;
+% unpack bootstrap means
+% pararray is nsample x nsub x nvar x ncond array
+pars = cell(nsub,nvar); % pars contains bootstrap means
 for ivar=1:nvar
-	z = squeeze(pararray(:,:,ivar,:));
-    pars{ivar} = permute(z, [1 3 2]);
+    for isub = 1:nsub
+        z = squeeze(pararray(:,isub,ivar,:));
+        pars{isub,ivar} = z;
+    end
 end
 

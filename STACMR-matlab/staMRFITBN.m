@@ -13,7 +13,7 @@ function [p, datafit, fits, pars] = staMRFITBN (data, varargin)
 % fits = nsample vector of fits of Monte Carlo samples (it is against this
 % distribution that datafit is compared to calculate p).
 % Note: These are g-squared values (not least squares)
-% pars = nvar cell array of bootstrap means nsample x ncond x nsub
+% pars = nsub x nvar cell array of bootstrap means nsample x ncond 
 % *************************************************************************
 % Last modified: 24 February 2017
 % updated 10 March 2017
@@ -26,6 +26,7 @@ if ~iscell(data)
 else
     y = data;
 end
+nsub = size(y,1);
 nvar = size(y,2);
 nsample = 1;
 E = {};
@@ -54,8 +55,12 @@ end
 % clear up near zero values
 datafit(datafit<tol)=0;
 fits(fits<tol)=0;
-pars = cell(1,nvar); % pars contains bootstrap means
+% unpack bootstrap means
+% pararray is nsample x nsub x nvar x ncond array
+pars = cell(nsub,nvar); % pars contains bootstrap means
 for ivar=1:nvar
-	z = squeeze(pararray(:,:,ivar,:));
-    pars{ivar} = permute(z, [1 3 2]);
+    for isub = 1:nsub
+        z = squeeze(pararray(:,isub,ivar,:));
+        pars{isub,ivar} = z;
+    end
 end
