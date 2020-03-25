@@ -23,7 +23,6 @@ gen2list = function (data=NULL, varnames=list()) {
   
   y = vector("list",ngroup)
   for (igroup in 1:ngroup) {
-    temp = vector("list", nvar)
     for (ivar in 1:nvar){
       k = which(group==ugroup[igroup] & var==uvar[ivar])
       a = as.matrix(within[k,])
