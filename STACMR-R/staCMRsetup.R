@@ -2,7 +2,7 @@
 # sources STACMR functions, loads required packages, and links to java runtime library
 # execute this program before doing anything else
 bookinfo = 'Dunn, J. C. & Kalish, M. L. (2018). State-Trace Analysis. Springer.'
-cat ('STACMR program library Version 21.02.2018\n')
+cat ('STACMR program library Version 26.03.2020\n')
 cat ('Utility programs for use with the book:\n')
 cat (paste0(bookinfo,'\n\n'))
 source ('staSTATS.R')
@@ -14,7 +14,6 @@ source ('staCMRFIT.R')
 source ('staPLOTBN.R')
 source ('staMRBN.R')
 source ('staCMRBN.R')
-source ('staCMRFITBN.R')
 source ('staMRFITBN.R')
 source ('staCMRFITBN.R')
 
