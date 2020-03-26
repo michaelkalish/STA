@@ -4,7 +4,7 @@ function staCMRsetup(filename)
 % Otherwise, add the newest version of fxMR to the java classpath from the
 % higher director. Filename must be in the format "fxMR-X.X.X.jar".
 bookinfo = 'Dunn, J. C. & Kalish, M. L. (2018). State-Trace Analysis. Springer.';
-fprintf('STACMR program library Version 21.02.2018\n');
+fprintf('STACMR program library Version 26.03.2020\n');
 fprintf (['Utility programs for use with the book:\n', bookinfo, '\n\n'])
 
 if nargin==0
