@@ -76,5 +76,7 @@ jMRfits <- function(nsample, y, E=list(), shrink=-1, proc=-1) {
     }
   }
   
-  return(list(p = sol$getP(), fits = sol$getFits(),datafit = sol$getDataFit()))
+  pars <- .jevalArray(sol$getXStars(), simplify = FALSE)
+  return(list(p = sol$getP(), fits = sol$getFits(), datafit = sol$getDataFit(),
+              pars = pars))
 }
